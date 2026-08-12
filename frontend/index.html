@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Voice Care System | Hands-Free SOS Assistance</title>
+  <meta name="description" content="Voice-activated emergency medical alert system providing continuous trigger word recognition, live GPS sharing, and automated caregiver escalation.">
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-icon">🚨</div>
+        <div>
+          <div class="brand-title">VoiceCare SOS</div>
+          <div class="brand-subtitle">Emergency Assistance System</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div class="system-status-pill">
+          <div class="pulse-dot"></div>
+          <span>System Online • 5G • 92% Battery</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-target="tab-sos">
+        <span>🚨</span> SOS Dashboard
+      </button>
+      <button class="tab-btn" data-target="tab-voice">
+        <span>🎙️</span> Voice Trigger
+      </button>
+      <button class="tab-btn" data-target="tab-contacts">
+        <span>📞</span> Emergency Contacts
+      </button>
+      <button class="tab-btn" data-target="tab-profile">
+        <span>📋</span> Medical ID Profile
+      </button>
+      <button class="tab-btn" data-target="tab-history">
+        <span>📜</span> Event History
+      </button>
+    </nav>
+
+    <!-- TAB 1: SOS DASHBOARD -->
+    <section id="tab-sos" class="tab-content" style="display: block;">
+      <div class="main-grid">
+        
+        <!-- Left: Big SOS Button -->
+        <div class="glass-card sos-container">
+          <button class="sos-button" onclick="triggerEmergencyAlert('MANUAL_BUTTON')">
+            <span class="sos-text">SOS</span>
+            <span class="sos-subtext">TAP OR SAY "HELP"</span>
+          </button>
+
+          <!-- Voice Listener Bar -->
+          <div class="voice-bar">
+            <div id="micBadge" class="mic-badge listening">🎙️</div>
+            <div style="flex: 1;">
+              <div id="micStatusLabel" style="font-weight: 600; font-size: 14px;">Listening for trigger word...</div>
+              <div id="liveSpeechTranscript" style="font-size: 12px; color: var(--text-secondary);">Say "HELP EMERGENCY" anytime hands-free</div>
+            </div>
+            <div class="audio-waveform">
+              <div class="bar active"></div>
+              <div class="bar active"></div>
+              <div class="bar active"></div>
+              <div class="bar active"></div>
+              <div class="bar active"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Active Status & Quick Info -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          
+          <div class="glass-card">
+            <div class="card-title">
+              <span>📍 Live GPS Location</span>
+              <span class="badge badge-primary">GPS Active</span>
+            </div>
+            <p style="font-size: 14px; color: var(--text-secondary);">
+              Location coordinates are automatically attached to all emergency dispatches.
+            </p>
+            <div style="padding: 16px; background: rgba(10, 13, 20, 0.6); border-radius: 12px; font-family: monospace; font-size: 13px; color: var(--accent-cyan);">
+              LAT: 12.9716 N | LNG: 77.5946 E<br>
+              ADDRESS: Springfield Emergency Zone
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title">
+              <span>🛡️ Caregiver Escalation Chain</span>
+              <span class="badge badge-danger">Ready</span>
+            </div>
+            <p style="font-size: 13px; color: var(--text-secondary);">
+              If Level 1 primary contact does not respond in 120s, system automatically escalates to fallback contacts and emergency service.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: VOICE TRIGGER SETTINGS -->
+    <section id="tab-voice" class="tab-content" style="display: none;">
+      <div class="glass-card">
+        <div class="card-title">🎙️ Spoken Trigger Word Configuration</div>
+        <p style="color: var(--text-secondary); font-size: 14px;">
+          Customize the secret emergency phrase that your phone will listen for in ambient mode. Make sure it is distinct and easy for you to pronounce.
+        </p>
+
+        <div class="form-group" style="max-width: 500px; margin-top: 16px;">
+          <label class="form-label">Custom Trigger Phrase</label>
+          <input type="text" id="triggerWordInput" class="form-input" value="HELP EMERGENCY" placeholder="e.g. HELP EMERGENCY, SAVE ME NOW">
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-primary" onclick="updateTriggerWord()">Save Trigger Phrase</button>
+          <button class="btn btn-danger" onclick="triggerEmergencyAlert('VOICE_KEYWORD', document.getElementById('triggerWordInput').value)">Test Voice Trigger</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: EMERGENCY CONTACTS -->
+    <section id="tab-contacts" class="tab-content" style="display: none;">
+      <div class="main-grid">
+        
+        <div class="glass-card">
+          <div class="card-title">📞 Configured Emergency Contacts</div>
+          <div id="contactsListContainer" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-title">➕ Add New Contact</div>
+          <form id="contactForm" onsubmit="handleAddContact(event)">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="contactName" class="form-input" placeholder="e.g. Dr. Robert Vance" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Relationship</label>
+              <input type="text" id="contactRel" class="form-input" placeholder="e.g. Son / Primary Caregiver" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="text" id="contactPhone" class="form-input" placeholder="+1-555-019-9944" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Escalation Priority</label>
+              <select id="contactPriority" class="form-input">
+                <option value="1">Priority 1 (Primary Recipient)</option>
+                <option value="2">Priority 2 (Secondary Escalation)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Contact</button>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: MEDICAL PROFILE ID -->
+    <section id="tab-profile" class="tab-content" style="display: none;">
+      <div class="glass-card">
+        <div class="card-title">
+          <span>📋 Patient Emergency Medical Card</span>
+          <button class="btn btn-primary" onclick="downloadMedicalSummary()">📥 Export Emergency Card (JSON)</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 16px;">
+          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 12px; color: var(--text-secondary);">PATIENT NAME</div>
+            <div id="profileName" style="font-size: 18px; font-weight: 700; color: #ffffff;">Eleanor Vance</div>
+          </div>
+
+          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 12px; color: var(--text-secondary);">BLOOD GROUP</div>
+            <div id="profileBlood" style="font-size: 18px; font-weight: 700; color: var(--accent-red);">A+</div>
+          </div>
+
+          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 12px; color: var(--text-secondary);">KNOWN ALLERGIES</div>
+            <div id="profileAllergies" style="font-size: 15px; font-weight: 600;">Penicillin, Peanuts</div>
+          </div>
+
+          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 12px; color: var(--text-secondary);">CHRONIC CONDITIONS</div>
+            <div id="profileConditions" style="font-size: 15px; font-weight: 600;">Hypertension, Type 2 Diabetes</div>
+          </div>
+
+          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 12px; color: var(--text-secondary);">CURRENT MEDICINES</div>
+            <div id="profileMedicines" style="font-size: 15px; font-weight: 600;">Lisinopril 10mg, Metformin 500mg</div>
+          </div>
+
+          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 12px; color: var(--text-secondary);">PREFERRED HOSPITAL</div>
+            <div id="profileHospital" style="font-size: 15px; font-weight: 600;">St. Mary's General Hospital</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: EVENT HISTORY -->
+    <section id="tab-history" class="tab-content" style="display: none;">
+      <div class="glass-card">
+        <div class="card-title">📜 Emergency SOS Event Log</div>
+        <div id="sosHistoryContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- EMERGENCY SOS COUNTDOWN MODAL -->
+  <div id="sosModal" class="modal-overlay">
+    <div class="sos-modal-content">
+      <h2 style="color: var(--accent-red); font-family: var(--font-display); font-size: 26px;">🚨 EMERGENCY SOS TRIGGERED</h2>
+      <div id="sosPhraseNote" style="font-size: 14px; color: var(--text-secondary);">Voice keyword match detected</div>
+      
+      <div class="countdown-circle">
+        <span id="countdownValue">5</span>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-secondary);">
+        Dispatching location and medical profile to primary caregivers in 5 seconds.
+      </p>
+
+      <button class="btn btn-danger" style="width: 100%; padding: 16px; font-size: 16px;" onclick="cancelEmergencyAlert()">
+        CANCEL EMERGENCY ALERT
+      </button>
+    </div>
+  </div>
+
+  <!-- JS Scripts -->
+  <script src="static/js/api.js"></script>
+  <script src="js/api.js"></script>
+  <script src="static/js/location_service.js"></script>
+  <script src="js/location_service.js"></script>
+  <script src="static/js/voice_listener.js"></script>
+  <script src="js/voice_listener.js"></script>
+  <script src="static/js/app.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
