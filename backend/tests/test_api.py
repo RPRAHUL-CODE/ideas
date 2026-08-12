@@ -67,5 +67,23 @@ class TestEmergencyVoiceCareAPI(unittest.TestCase):
         self.assertIn("full_name", card)
         self.assertIn("blood_group", card)
 
+    def test_07_contact_add_and_delete(self):
+        # Add contact
+        add_res = client.post("/api/contacts/1/add", json={
+            "name": "Test Contact",
+            "relationship": "Friend",
+            "phone_number": "+1-555-999-0000",
+            "priority_order": 3,
+            "notification_method": "SMS"
+        })
+        self.assertEqual(add_res.status_code, 200)
+        contact_data = add_res.json()
+        contact_id = contact_data["contact_id"]
+
+        # Delete contact
+        del_res = client.delete(f"/api/contacts/{contact_id}")
+        self.assertEqual(del_res.status_code, 200)
+        self.assertEqual(del_res.json()["status"], "SUCCESS")
+
 if __name__ == "__main__":
     unittest.main()

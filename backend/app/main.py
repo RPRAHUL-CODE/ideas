@@ -37,6 +37,12 @@ FRONTEND_DIR = os.path.join(os.path.dirname(BASE_DIR), "frontend")
 
 if os.path.exists(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+    css_dir = os.path.join(FRONTEND_DIR, "css")
+    js_dir = os.path.join(FRONTEND_DIR, "js")
+    if os.path.exists(css_dir):
+        app.mount("/css", StaticFiles(directory=css_dir), name="css")
+    if os.path.exists(js_dir):
+        app.mount("/js", StaticFiles(directory=js_dir), name="js")
 
 @app.get("/")
 def serve_home():
@@ -188,11 +194,12 @@ def add_contact(user_id: int, contact_in: schemas.ContactCreate, db: Session = D
 
 @app.delete("/api/contacts/{contact_id}")
 def delete_contact(contact_id: int, db: Session = Depends(get_db)):
-    contact = models.EmergencyContact.filter(models.EmergencyContact.contact_id == contact_id).first()
+    contact = db.query(models.EmergencyContact).filter(models.EmergencyContact.contact_id == contact_id).first()
     if contact:
         db.delete(contact)
         db.commit()
-    return {"status": "SUCCESS", "message": "Contact deleted"}
+        return {"status": "SUCCESS", "message": "Contact deleted"}
+    raise HTTPException(status_code=404, detail="Contact not found")
 
 # --- SOS & Speech Endpoints ---
 @app.post("/api/sos/evaluate-speech")

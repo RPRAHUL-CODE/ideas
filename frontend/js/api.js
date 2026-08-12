@@ -51,6 +51,13 @@ class EmergencyAPI {
     return await res.json();
   }
 
+  static async deleteContact(contactId) {
+    const res = await fetch(`${API_BASE}/contacts/${contactId}`, {
+      method: 'DELETE'
+    });
+    return await res.json();
+  }
+
   static async triggerSOS(payload) {
     const res = await fetch(`${API_BASE}/sos/trigger`, {
       method: 'POST',

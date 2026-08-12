@@ -162,9 +162,17 @@ async function loadContacts() {
           Priority ${c.priority_order}
         </span>
         <span class="badge badge-primary">${c.notification_method}</span>
+        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="handleDeleteContact(${c.contact_id})">🗑️ Delete</button>
       </div>
     </div>
   `).join('');
+}
+
+async function handleDeleteContact(contactId) {
+  if (confirm("Are you sure you want to delete this emergency contact?")) {
+    await EmergencyAPI.deleteContact(contactId);
+    loadContacts();
+  }
 }
 
 async function handleAddContact(event) {
