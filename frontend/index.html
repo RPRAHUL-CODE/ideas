@@ -25,7 +25,7 @@
       <div style="display: flex; gap: 16px; align-items: center;">
         <div class="system-status-pill">
           <div class="pulse-dot"></div>
-          <span>System Online • 5G • 92% Battery</span>
+          <span id="headerSystemStatus">System Online • GPS Active • 92% Battery</span>
         </div>
       </div>
     </header>
@@ -51,6 +51,43 @@
 
     <!-- TAB 1: SOS DASHBOARD -->
     <section id="tab-sos" class="tab-content" style="display: block;">
+      
+      <!-- Active Dispatch Banner (Renders dynamically when SOS is triggered) -->
+      <div id="activeDispatchCard" class="glass-card" style="display: none; border-color: var(--accent-red); background: rgba(35, 12, 22, 0.7); margin-bottom: 24px;">
+        <div class="card-title" style="color: var(--accent-red);">
+          <span>🚨 ACTIVE EMERGENCY ALERT DISPATCHED</span>
+          <span id="dispatchStatusBadge" class="badge badge-danger">PRIMARY CONTACTS ALERTED</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 10px;">
+          <div style="padding: 12px; background: rgba(10, 13, 20, 0.6); border-radius: 12px; border: 1px solid rgba(255, 51, 102, 0.3);">
+            <div style="font-size: 11px; color: var(--text-secondary);">EVENT DETAILS</div>
+            <div id="dispatchDetails" style="font-size: 14px; font-weight: 600; color: #fff; margin-top: 4px;">-</div>
+          </div>
+
+          <div style="padding: 12px; background: rgba(10, 13, 20, 0.6); border-radius: 12px; border: 1px solid rgba(6, 182, 212, 0.3);">
+            <div style="font-size: 11px; color: var(--text-secondary);">SHARED LIVE GPS MAP LINK</div>
+            <div style="margin-top: 4px;">
+              <a id="dispatchMapLink" href="#" target="_blank" style="color: var(--accent-cyan); font-weight: 600; font-size: 13px; text-decoration: underline;">
+                🔗 Open Shared Google Maps Location
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">CONTACT DISPATCH LOG & DELIVERY STATUS</div>
+          <div id="dispatchLogList" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; pt: 12px; border-top: 1px solid var(--border-glass);">
+          <span style="font-size: 12px; color: var(--text-secondary);">Level 2 Backup Escalation in <strong id="escalationCountdown" style="color: var(--accent-amber);">120s</strong> if unacknowledged</span>
+          <button class="btn btn-primary" style="padding: 8px 18px; font-size: 13px;" onclick="handleAcknowledgeCurrentSOS()">✅ Acknowledge & Resolve SOS</button>
+        </div>
+      </div>
+
       <div class="main-grid">
         
         <!-- Left: Big SOS Button -->
@@ -82,25 +119,36 @@
           
           <div class="glass-card">
             <div class="card-title">
-              <span>📍 Live GPS Location</span>
-              <span class="badge badge-primary">GPS Active</span>
+              <span>📍 Real-Time Live GPS Fix</span>
+              <span id="liveAccuracyTag" class="badge badge-primary">Acquiring GPS...</span>
             </div>
-            <p style="font-size: 14px; color: var(--text-secondary);">
-              Location coordinates are automatically attached to all emergency dispatches.
+            <p style="font-size: 13px; color: var(--text-secondary);">
+              Live location coordinates are captured and automatically attached to all emergency dispatches.
             </p>
-            <div style="padding: 16px; background: rgba(10, 13, 20, 0.6); border-radius: 12px; font-family: monospace; font-size: 13px; color: var(--accent-cyan);">
-              LAT: 12.9716 N | LNG: 77.5946 E<br>
-              ADDRESS: Springfield Emergency Zone
+            
+            <div style="padding: 16px; background: rgba(10, 13, 20, 0.6); border-radius: 14px; border: 1px solid var(--border-glass); display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 13px; font-family: monospace;">
+                <span>LATITUDE: <strong id="liveLat" style="color: var(--accent-cyan);">12.9716 N</strong></span>
+                <span>LONGITUDE: <strong id="liveLng" style="color: var(--accent-cyan);">77.5946 E</strong></span>
+              </div>
+              <div style="font-size: 12px; color: var(--text-primary);">
+                📍 ADDRESS: <span id="liveAddress" style="font-weight: 600;">Fetching live address fix...</span>
+              </div>
+              <div style="margin-top: 4px;">
+                <a id="liveMapLinkAnchor" href="#" target="_blank" style="font-size: 12px; color: var(--accent-cyan); font-weight: 600; text-decoration: underline;">
+                  🗺️ View Live Map Coordinates
+                </a>
+              </div>
             </div>
           </div>
 
           <div class="glass-card">
             <div class="card-title">
               <span>🛡️ Caregiver Escalation Chain</span>
-              <span class="badge badge-danger">Ready</span>
+              <span class="badge badge-danger">Multi-Tier Enabled</span>
             </div>
             <p style="font-size: 13px; color: var(--text-secondary);">
-              If Level 1 primary contact does not respond in 120s, system automatically escalates to fallback contacts and emergency service.
+              If Level 1 primary contact does not respond in 120s, system automatically escalates to fallback contacts and regional emergency ambulance services.
             </p>
           </div>
 

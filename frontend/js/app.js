@@ -3,12 +3,17 @@ let countdownTimer = null;
 let countdownSeconds = 5;
 let audioContext = null;
 
+let currentActiveSOSEventId = null;
+let escalationTimer = null;
+let escalationTimerSeconds = 120;
+
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   loadProfile();
   loadContacts();
   loadHistory();
   initVoiceListener();
+  initLiveLocationTracker();
   animateWaveform();
 });
 
@@ -27,6 +32,30 @@ function initTabs() {
       document.getElementById(targetId).style.display = 'block';
     });
   });
+}
+
+// --- Live Location Tracker ---
+async function initLiveLocationTracker() {
+  const loc = await locationService.getCurrentLocation();
+  updateLiveLocationUI(loc);
+
+  locationService.startLiveLocationWatch((updatedLoc) => {
+    updateLiveLocationUI(updatedLoc);
+  });
+}
+
+function updateLiveLocationUI(loc) {
+  const latEl = document.getElementById('liveLat');
+  const lngEl = document.getElementById('liveLng');
+  const addrEl = document.getElementById('liveAddress');
+  const tagEl = document.getElementById('liveAccuracyTag');
+  const mapLinkEl = document.getElementById('liveMapLinkAnchor');
+
+  if (latEl) latEl.textContent = `${loc.lat.toFixed(4)} N`;
+  if (lngEl) lngEl.textContent = `${loc.lng.toFixed(4)} E`;
+  if (addrEl) addrEl.textContent = loc.address;
+  if (tagEl) tagEl.textContent = loc.accuracy;
+  if (mapLinkEl) mapLinkEl.setAttribute('href', loc.mapLink);
 }
 
 // --- Audio Synthesizer Alarm ---
@@ -112,8 +141,76 @@ async function executeSOSTransmission(triggerType, phrase) {
 
   const response = await EmergencyAPI.triggerSOS(payload);
   
-  showNotificationModal("🚨 SOS ALERT DISPATCHED", `Emergency alert sent to contacts & caregivers. Location: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`);
+  if (response && response.status === "SOS_TRIGGERED") {
+    currentActiveSOSEventId = response.event_id;
+    renderActiveDispatchBanner(response);
+  } else {
+    showNotificationModal("🚨 SOS ALERT DISPATCHED", `Emergency alert sent to contacts & caregivers. Location: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`);
+  }
   loadHistory();
+}
+
+function renderActiveDispatchBanner(sosResponse) {
+  const card = document.getElementById('activeDispatchCard');
+  const detailsEl = document.getElementById('dispatchDetails');
+  const mapLinkEl = document.getElementById('dispatchMapLink');
+  const logListEl = document.getElementById('dispatchLogList');
+
+  if (!card) return;
+  card.style.display = 'block';
+
+  const esc = sosResponse.escalation || {};
+  if (detailsEl) {
+    detailsEl.textContent = `Event #${sosResponse.event_id} • Patient: ${esc.user_name || 'Patient'} • Phone: ${esc.user_phone || ''} • Trigger: ${sosResponse.trigger_type}`;
+  }
+
+  if (mapLinkEl && esc.location_link) {
+    mapLinkEl.setAttribute('href', esc.location_link);
+  }
+
+  if (logListEl && esc.dispatch_log) {
+    logListEl.innerHTML = esc.dispatch_log.map(d => `
+      <div style="padding: 10px 14px; background: rgba(10, 13, 20, 0.7); border-radius: 10px; border-left: 3px solid ${d.level === 1 ? 'var(--accent-red)' : 'var(--accent-cyan)'}; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 13px; font-weight: 600; color: #fff;">Level ${d.level}: ${d.target}</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">${d.action || d.note || ''}</div>
+        </div>
+        <span class="badge ${d.status.includes('DELIVERED') ? 'badge-danger' : 'badge-primary'}">${d.status}</span>
+      </div>
+    `).join('');
+  }
+
+  // Start 120s Escalation timer
+  escalationTimerSeconds = 120;
+  const countEl = document.getElementById('escalationCountdown');
+  if (escalationTimer) clearInterval(escalationTimer);
+
+  escalationTimer = setInterval(() => {
+    escalationTimerSeconds--;
+    if (countEl) countEl.textContent = `${escalationTimerSeconds}s`;
+    if (escalationTimerSeconds <= 0) {
+      clearInterval(escalationTimer);
+      if (countEl) countEl.textContent = "ESCALATED TO LEVEL 2 CONTACTS!";
+    }
+  }, 1000);
+}
+
+async function handleAcknowledgeCurrentSOS() {
+  if (!currentActiveSOSEventId) {
+    document.getElementById('activeDispatchCard').style.display = 'none';
+    return;
+  }
+
+  const res = await fetch(`${API_BASE}/sos/${currentActiveSOSEventId}/acknowledge`, {
+    method: 'POST'
+  });
+  if (res.ok) {
+    alert("SOS Event acknowledged and resolved successfully.");
+    if (escalationTimer) clearInterval(escalationTimer);
+    document.getElementById('activeDispatchCard').style.display = 'none';
+    currentActiveSOSEventId = null;
+    loadHistory();
+  }
 }
 
 // --- Profile & Data Loading ---
