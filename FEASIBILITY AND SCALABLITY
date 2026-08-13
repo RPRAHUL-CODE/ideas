@@ -1,0 +1,18 @@
+ Feasibility — 
+  Yes, the project is feasible, especially when developed first as a small MVP (Minimum Viable Product). 
+ The proposed MVP includes a mobile app, user registration, medical profile, emergency contacts, one custom trigger word, voice-trigger detection, SOS notification flow, live location sharing, and emergency history.
+Important challenges: • Mobile operating systems may restrict continuous background microphone listening.
+• Internet connectivity may not always be available during an emergency.
+• Continuous voice monitoring can affect battery life. • Medical information requires strong privacy and security.
+• Ambulance/emergency integration can differ by region.
+SCALABILITY
+Yes. The project can begin as a simple mobile emergency application and gradually become a larger emergency-response platform
+Version 1 — MVP
+Voice trigger → SOS → caregiver alert → GPS location
+VERSION 2 Reliability 
+Escalation → backup caregiver → retry/fallback mechanisms
+VERSION 3 Advanced
+Fall detection → wearable integration → multilingual support
+Version 4 Intelligent 
+ Hospital integration → smart routing → AI severity estimation
+ 
