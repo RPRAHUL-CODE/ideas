@@ -87,4 +87,13 @@ class EmergencyAPI {
     const res = await fetch(`${API_BASE}/medical/export/${userId}`);
     return await res.json();
   }
+
+  static async sendHealthChatMessage(message, userId = 1) {
+    const res = await fetch(`${API_BASE}/chat/health-assistant`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, user_id: userId })
+    });
+    return await res.json();
+  }
 }

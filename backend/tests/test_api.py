@@ -85,5 +85,17 @@ class TestEmergencyVoiceCareAPI(unittest.TestCase):
         self.assertEqual(del_res.status_code, 200)
         self.assertEqual(del_res.json()["status"], "SUCCESS")
 
+    def test_08_healthcare_ai_chatbot(self):
+        # General query
+        res1 = client.post("/api/chat/health-assistant", json={"message": "What is CPR?", "user_id": 1})
+        self.assertEqual(res1.status_code, 200)
+        self.assertIn("CPR Instructions", res1.json()["reply"])
+        self.assertFalse(res1.json()["should_trigger_sos"])
+
+        # Critical red-flag emergency query
+        res2 = client.post("/api/chat/health-assistant", json={"message": "I have severe chest pain and left arm numbness", "user_id": 1})
+        self.assertEqual(res2.status_code, 200)
+        self.assertTrue(res2.json()["should_trigger_sos"])
+
 if __name__ == "__main__":
     unittest.main()

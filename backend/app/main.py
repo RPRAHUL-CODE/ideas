@@ -280,3 +280,50 @@ def get_device_status(user_id: int, db: Session = Depends(get_db)):
         "location_permission": status_rec.location_permission,
         "last_sync_time": status_rec.last_sync_time.isoformat()
     }
+
+# --- Healthcare AI Chatbot Endpoint ---
+@app.post("/api/chat/health-assistant")
+def healthcare_ai_assistant(data: dict, db: Session = Depends(get_db)):
+    user_message = data.get("message", "").strip()
+    user_id = data.get("user_id", 1)
+    
+    if not user_message:
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+        
+    user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    user_name = user.full_name if user else "Patient"
+
+    msg_lower = user_message.lower()
+    
+    # Red-flag emergency triage check
+    critical_triggers = ["chest pain", "heart attack", "stroke", "cannot breathe", "breathing difficulty", "unconscious", "heavy bleeding", "numbness left arm", "severe allergic"]
+    is_critical = any(ct in msg_lower for ct in critical_triggers)
+    
+    if is_critical:
+        bot_response = f"🚨 URGENT MEDICAL WARNING: Your query indicates a potentially critical emergency ({user_message}). Please stay calm. I am automatically offering to dispatch your VoiceCare SOS alert to your primary contacts and emergency services immediately."
+        triage_level = "CRITICAL_RED_FLAG"
+        should_sos = True
+    elif "cpr" in msg_lower:
+        bot_response = "CPR Instructions: 1) Call emergency service 108/911. 2) Place hands in center of chest. 3) Push hard and fast (100-120 compressions/min) to the beat of 'Staying Alive'. 4) Continue until help arrives."
+        triage_level = "FIRST_AID_GUIDANCE"
+        should_sos = False
+    elif "fever" in msg_lower:
+        bot_response = "Fever Guidance: Stay hydrated, rest, and use OTC antipyretics like acetaminophen/paracetamol if appropriate. If fever exceeds 103°F (39.4°C) or lasts >3 days, seek urgent medical evaluation."
+        triage_level = "GENERAL_HEALTH"
+        should_sos = False
+    elif "burn" in msg_lower:
+        bot_response = "First Aid for Burns: Cool the burn under cool running water for 10-20 minutes. Cover loosely with a clean, sterile bandage. Do not apply ice, butter, or break blisters."
+        triage_level = "FIRST_AID_GUIDANCE"
+        should_sos = False
+    else:
+        bot_response = f"Hello {user_name}, I am your VoiceCare Healthcare AI Assistant. I can assist with first-aid steps, symptom checking, and emergency guidance. How are you feeling right now? (Note: For severe pain or breathing issues, use the SOS button immediately)."
+        triage_level = "GENERAL_ASSISTANT"
+        should_sos = False
+        
+    return {
+        "reply": bot_response,
+        "triage_level": triage_level,
+        "should_trigger_sos": should_sos,
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "disclaimer": "This AI Healthcare Assistant provides first-aid information and symptom triage only, not professional medical diagnosis."
+    }

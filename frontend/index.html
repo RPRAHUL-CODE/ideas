@@ -35,6 +35,9 @@
       <button class="tab-btn active" data-target="tab-sos">
         <span>🚨</span> SOS Dashboard
       </button>
+      <button class="tab-btn" data-target="tab-chatbot">
+        <span>💬</span> Healthcare AI Chatbot
+      </button>
       <button class="tab-btn" data-target="tab-voice">
         <span>🎙️</span> Voice Trigger
       </button>
@@ -154,6 +157,42 @@
 
         </div>
 
+      </div>
+    </section>
+
+    <!-- TAB: HEALTHCARE AI CHATBOT -->
+    <section id="tab-chatbot" class="tab-content" style="display: none;">
+      <div class="glass-card">
+        <div class="card-title">
+          <span>💬 VoiceCare Healthcare AI Assistant</span>
+          <span class="badge badge-primary">24/7 Medical Triage AI</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px;">
+          Ask symptom queries, first-aid steps, or emergency triage advice. If critical emergency symptoms are detected, the AI will offer to dispatch your SOS alert automatically.
+        </p>
+
+        <!-- Suggestion Chips -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('I am experiencing chest pain and left arm numbness')">🚨 Chest Pain Triage</button>
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('What are the first aid steps for CPR?')">🫀 CPR First Aid</button>
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('First aid for minor household burns')">🔥 Burn First Aid</button>
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('How to manage a high fever at home?')">🌡️ High Fever Care</button>
+        </div>
+
+        <!-- Chat History Log -->
+        <div id="chatMessagesContainer" style="height: 340px; overflow-y: auto; background: rgba(10, 13, 20, 0.6); border: 1px solid var(--border-glass); border-radius: 16px; padding: 16px; margin-top: 14px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="padding: 12px; background: rgba(26, 35, 54, 0.7); border-radius: 12px; max-width: 80%; border-left: 3px solid var(--accent-cyan);">
+            <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 700;">HEALTHCARE AI BOT</div>
+            <div style="font-size: 13px; color: #fff; margin-top: 4px;">Hello! I am your Healthcare AI Assistant. Ask me any first-aid question or symptom check. (For severe crises, tap SOS immediately).</div>
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chatForm" onsubmit="handleHealthChatSubmit(event)" style="display: flex; gap: 10px; margin-top: 14px;">
+          <input type="text" id="chatInput" class="form-input" placeholder="Type your symptom or health question here..." required style="flex: 1;">
+          <button type="button" class="btn btn-primary" style="padding: 12px;" onclick="handleVoiceChatInput()">🎙️ Voice Input</button>
+          <button type="submit" class="btn btn-primary">Send 💬</button>
+        </form>
       </div>
     </section>
 

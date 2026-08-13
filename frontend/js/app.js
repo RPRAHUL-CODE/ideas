@@ -337,3 +337,89 @@ function animateWaveform() {
     });
   }, 200);
 }
+
+// --- Healthcare AI Chatbot Controllers ---
+async function handleHealthChatSubmit(event) {
+  if (event) event.preventDefault();
+  const inputEl = document.getElementById('chatInput');
+  const message = inputEl.value.trim();
+  if (!message) return;
+
+  inputEl.value = '';
+  appendChatMessage('USER', message, false);
+
+  try {
+    const response = await EmergencyAPI.sendHealthChatMessage(message, currentUserId);
+    appendChatMessage('HEALTHCARE AI BOT', response.reply, response.should_trigger_sos);
+
+    if (response.should_trigger_sos) {
+      setTimeout(() => {
+        if (confirm("🚨 CRITICAL WARNING: AI detected emergency symptoms. Trigger VoiceCare SOS alert now?")) {
+          triggerEmergencyAlert("VOICE_KEYWORD", message);
+        }
+      }, 500);
+    }
+  } catch (e) {
+    appendChatMessage('HEALTHCARE AI BOT', "Notice: Unable to reach online AI service. Please tap the red SOS button directly if you are experiencing an emergency.", true);
+  }
+}
+
+function sendQuickChatMessage(text) {
+  document.getElementById('chatInput').value = text;
+  handleHealthChatSubmit(null);
+}
+
+function appendChatMessage(sender, text, isCritical) {
+  const container = document.getElementById('chatMessagesContainer');
+  if (!container) return;
+
+  const msgDiv = document.createElement('div');
+  const isUser = sender === 'USER';
+
+  msgDiv.style.padding = '12px 16px';
+  msgDiv.style.borderRadius = '14px';
+  msgDiv.style.maxWidth = '85%';
+  msgDiv.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+
+  if (isUser) {
+    msgDiv.style.background = 'linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(2, 132, 199, 0.2))';
+    msgDiv.style.border = '1px solid rgba(6, 182, 212, 0.4)';
+    msgDiv.style.borderBottomRightRadius = '4px';
+  } else if (isCritical) {
+    msgDiv.style.background = 'rgba(50, 12, 25, 0.9)';
+    msgDiv.style.border = '2px solid var(--accent-red)';
+    msgDiv.style.borderBottomLeftRadius = '4px';
+    msgDiv.style.boxShadow = '0 0 15px rgba(255, 51, 102, 0.4)';
+  } else {
+    msgDiv.style.background = 'rgba(26, 35, 54, 0.7)';
+    msgDiv.style.border = '1px solid var(--border-glass)';
+    msgDiv.style.borderBottomLeftRadius = '4px';
+  }
+
+  msgDiv.innerHTML = `
+    <div style="font-size: 11px; font-weight: 700; color: ${isUser ? 'var(--accent-cyan)' : (isCritical ? 'var(--accent-red)' : 'var(--accent-cyan)')}; mb: 4px;">${sender}</div>
+    <div style="font-size: 13px; color: #ffffff; line-height: 1.5;">${text}</div>
+  `;
+
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+function handleVoiceChatInput() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Speech recognition is not supported in this browser. Please type your message.");
+    return;
+  }
+  const recog = new SpeechRecognition();
+  recog.lang = 'en-US';
+  recog.onstart = () => {
+    alert("🎙️ Listening... Speak your symptom or question now.");
+  };
+  recog.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('chatInput').value = transcript;
+    handleHealthChatSubmit(null);
+  };
+  recog.start();
+}
