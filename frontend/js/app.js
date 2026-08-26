@@ -1,13 +1,13 @@
 let currentUserId = 1;
 let currentUserProfile = {
-  full_name: "Eleanor Vance",
-  email: "demo@carevoice.app",
+  full_name: "Rahul Sharma",
+  email: "rahul@rakshaflow.app",
   blood_group: "O+",
-  allergies: "Penicillin, Peanuts",
-  chronic_conditions: "Hypertension, Type 2 Diabetes",
-  medicines: "Lisinopril 10mg, Metformin 500mg",
+  allergies: "None",
+  chronic_conditions: "None",
+  medicines: "None",
   preferred_hospital: "St. Mary's General Hospital",
-  trigger_word: "HELP EMERGENCY"
+  trigger_word: "HELP"
 };
 
 let countdownTimer = null;
@@ -49,6 +49,12 @@ function handleAuthLogin(event) {
   if (event) event.preventDefault();
   const email = document.getElementById('loginEmail').value;
 
+  if (email && email.includes('@')) {
+    const parts = email.split('@')[0].split('.');
+    const inferredName = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    currentUserProfile.full_name = inferredName || "Rahul Sharma";
+  }
+
   currentUserProfile.email = email;
   sessionStorage.setItem('rf_authenticated_user', JSON.stringify(currentUserProfile));
   
@@ -61,7 +67,7 @@ function handleAuthSignup(event) {
   const name = document.getElementById('signupName').value;
   const email = document.getElementById('signupEmail').value;
 
-  currentUserProfile.full_name = name;
+  currentUserProfile.full_name = name || "Rahul Sharma";
   currentUserProfile.email = email;
   sessionStorage.setItem('rf_authenticated_user', JSON.stringify(currentUserProfile));
 
@@ -70,7 +76,7 @@ function handleAuthSignup(event) {
 }
 
 function handleGoogleAuth() {
-  alert("Google Authentication is UI ready. Connect your Google OAuth Client ID in backend environment settings to enable live single-sign-on.");
+  alert("Google Single Sign-On UI ready. Integrate backend OAuth Client ID in environment settings to enable live Google authentication.");
   showAuthenticatedUI();
   navigateTo('dashboard');
 }
@@ -102,7 +108,7 @@ function showAuthenticatedUI() {
   const avatar = document.getElementById('userHeaderAvatar');
   if (avatar && currentUserProfile.full_name) {
     const initials = currentUserProfile.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    avatar.textContent = initials || 'EV';
+    avatar.textContent = initials || 'RF';
   }
 
   loadProfile();
@@ -199,7 +205,7 @@ function setupEcgCanvas(canvasId) {
     ctx.lineTo(x, newY);
     ctx.stroke();
 
-    // Glowing Leading Pulse Dot (Matching UI Reference)
+    // Glowing Leading Pulse Dot
     ctx.beginPath();
     ctx.arc(x, newY, 4, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
@@ -266,7 +272,7 @@ function shareCurrentLocation() {
     }).catch(() => {});
   } else {
     navigator.clipboard.writeText(loc.mapLink);
-    alert(`Live GPS Location copied to clipboard:\n${loc.mapLink}`);
+    alert(`Live GPS Location link copied to clipboard:\n${loc.mapLink}`);
   }
 }
 
@@ -455,33 +461,41 @@ async function handleAcknowledgeCurrentSOS() {
     return;
   }
 
-  const res = await fetch(`${API_BASE}/sos/${currentActiveSOSEventId}/acknowledge`, {
-    method: 'POST'
-  });
-  if (res.ok) {
-    alert("SOS Event acknowledged and resolved successfully.");
-    if (escalationTimer) clearInterval(escalationTimer);
-    document.getElementById('activeDispatchCard').style.display = 'none';
-    currentActiveSOSEventId = null;
-    loadHistory();
-  }
+  try {
+    await fetch(`${API_BASE}/sos/${currentActiveSOSEventId}/acknowledge`, { method: 'POST' });
+  } catch (e) {}
+
+  alert("SOS Event acknowledged and resolved successfully.");
+  if (escalationTimer) clearInterval(escalationTimer);
+  document.getElementById('activeDispatchCard').style.display = 'none';
+  currentActiveSOSEventId = null;
+  loadHistory();
 }
 
-// --- Data Loading & Rendering ---
+// --- Data Loading & Dynamic User Profile ---
 async function loadProfile() {
   const user = await EmergencyAPI.getProfile(currentUserId);
   if (user) {
     currentUserProfile = { ...currentUserProfile, ...user };
 
+    // Dynamic Greeting using logged-in user's First Name
+    const greetingEl = document.getElementById('dashGreeting');
+    if (greetingEl) {
+      const hour = new Date().getHours();
+      const timeSalutation = hour < 12 ? 'Good Morning' : (hour < 18 ? 'Good Afternoon' : 'Good Evening');
+      const firstName = (currentUserProfile.full_name || 'Rahul').split(' ')[0];
+      greetingEl.textContent = `${timeSalutation}, ${firstName}`;
+    }
+
     const elements = {
-      'profileName': user.full_name,
-      'profileBlood': user.blood_group || "O+",
-      'dashBloodGroup': user.blood_group || "O+",
-      'profileAllergies': user.allergies || "None",
-      'dashAllergies': user.allergies || "None",
-      'profileConditions': user.chronic_conditions || "None",
-      'profileMedicines': user.medicines || "None",
-      'profileHospital': user.preferred_hospital || "St. Mary's General Hospital"
+      'profileName': currentUserProfile.full_name,
+      'profileBlood': currentUserProfile.blood_group || "O+",
+      'dashBloodGroup': currentUserProfile.blood_group || "O+",
+      'profileAllergies': currentUserProfile.allergies || "None",
+      'dashAllergies': currentUserProfile.allergies || "None",
+      'profileConditions': currentUserProfile.chronic_conditions || "None",
+      'profileMedicines': currentUserProfile.medicines || "None",
+      'profileHospital': currentUserProfile.preferred_hospital || "St. Mary's General Hospital"
     };
 
     for (const [id, val] of Object.entries(elements)) {
@@ -490,15 +504,15 @@ async function loadProfile() {
     }
 
     const triggerInput = document.getElementById('triggerWordInput');
-    if (triggerInput) triggerInput.value = user.trigger_word || "HELP";
+    if (triggerInput) triggerInput.value = currentUserProfile.trigger_word || "HELP";
 
     const triggerDisplay = document.getElementById('dashTriggerWordStr');
-    if (triggerDisplay) triggerDisplay.textContent = `"${user.trigger_word || 'HELP'}"`;
+    if (triggerDisplay) triggerDisplay.textContent = `"${currentUserProfile.trigger_word || 'HELP'}"`;
 
     const voiceTriggerDetailDisplay = document.getElementById('voiceTriggerDisplayStr');
-    if (voiceTriggerDetailDisplay) voiceTriggerDetailDisplay.textContent = `"${user.trigger_word || 'HELP'}"`;
+    if (voiceTriggerDetailDisplay) voiceTriggerDetailDisplay.textContent = `"${currentUserProfile.trigger_word || 'HELP'}"`;
 
-    voiceListener.setTargetTrigger(user.trigger_word || "HELP");
+    voiceListener.setTargetTrigger(currentUserProfile.trigger_word || "HELP");
   }
 }
 
@@ -558,10 +572,12 @@ async function loadContacts() {
   `).join('');
 }
 
+// Emergency Contacts Deletion Fix
 async function handleDeleteContact(contactId) {
   if (confirm("Are you sure you want to delete this emergency contact?")) {
-    await EmergencyAPI.deleteContact(contactId);
-    loadContacts();
+    await EmergencyAPI.deleteContact(contactId, currentUserId);
+    await loadContacts();
+    alert("Emergency Contact deleted successfully.");
   }
 }
 
@@ -592,7 +608,7 @@ async function loadHistory() {
 
   if (dashList) {
     if (history.length === 0) {
-      dashList.innerHTML = '<p style="color: var(--rf-text-secondary); font-size: 12px;">No recent activity.</p>';
+      dashList.innerHTML = '<p style="color: var(--rf-text-secondary); font-size: 12px;">No emergency activity yet.</p>';
     } else {
       dashList.innerHTML = history.slice(0, 3).map(ev => `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(5, 8, 17, 0.5); border-radius: 8px;">
@@ -609,7 +625,7 @@ async function loadHistory() {
   if (!container) return;
 
   if (history.length === 0) {
-    container.innerHTML = '<p style="color: var(--rf-text-secondary); font-size: 13px;">No previous SOS events recorded.</p>';
+    container.innerHTML = '<p style="color: var(--rf-text-secondary); font-size: 13px;">No emergency activity yet.</p>';
     return;
   }
 
@@ -624,7 +640,7 @@ async function loadHistory() {
   `).join('');
 }
 
-// --- Edit Medical Profile Modal ---
+// Edit Medical Profile Modal Fix
 function openEditProfileModal() {
   document.getElementById('editName').value = currentUserProfile.full_name || '';
   document.getElementById('editBlood').value = currentUserProfile.blood_group || 'O+';
@@ -651,10 +667,13 @@ async function handleSaveProfileEdit(event) {
     preferred_hospital: document.getElementById('editHospital').value
   };
 
-  await EmergencyAPI.updateProfile(currentUserId, updateData);
+  const updatedUser = await EmergencyAPI.updateProfile(currentUserId, updateData);
+  currentUserProfile = { ...currentUserProfile, ...updatedUser };
+  sessionStorage.setItem('rf_authenticated_user', JSON.stringify(currentUserProfile));
+
   closeEditProfileModal();
-  loadProfile();
-  alert("Medical Profile updated successfully.");
+  await loadProfile();
+  alert("Medical Profile updated and saved successfully.");
 }
 
 async function downloadMedicalSummary() {

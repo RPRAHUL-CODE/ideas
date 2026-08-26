@@ -1,0 +1,18 @@
+<svg viewBox="0 0 320 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rf-shield-grad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield Outer Vector -->
+  <path d="M42 12 L72 22 V46 C72 66 42 76 42 76 C42 76 12 66 12 46 V22 Z" stroke="url(#rf-shield-grad)" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Wave / Flow Loop Inside Shield -->
+  <path d="M24 43 C32 35, 40 49, 52 39" stroke="url(#rf-shield-grad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M50 35 L60 39 L50 45" fill="none" stroke="url(#rf-shield-grad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Brand Text in Pure White matching dark navy interface -->
+  <text x="90" y="50" fill="#FFFFFF" font-family="'Space Grotesk', 'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="27" letter-spacing="1.2">RAKSHA FLOW</text>
+</svg>

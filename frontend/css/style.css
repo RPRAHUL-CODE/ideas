@@ -107,6 +107,9 @@ body {
   height: 38px;
   width: auto;
   object-fit: contain;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .rf-header-actions {
@@ -196,7 +199,7 @@ body {
 .rf-content-body {
   flex: 1;
   padding: 20px;
-  padding-bottom: 96px; /* Mobile Bottom Nav offset */
+  padding-bottom: 96px;
   overflow-y: auto;
 }
 

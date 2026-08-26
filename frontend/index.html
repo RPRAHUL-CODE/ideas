@@ -15,7 +15,7 @@
     <!-- Top Header Navigation -->
     <header id="appHeader" class="rf-header" style="display: none;">
       <div class="rf-brand-group" onclick="navigateTo('dashboard')">
-        <img src="assets/raksha_flow_logo_official.jpg" alt="Raksha Flow Logo" class="rf-logo-img-official" onerror="this.src='static/assets/raksha_flow_logo_official.jpg'">
+        <img src="assets/raksha_flow_logo.svg" alt="RAKSHA FLOW" class="rf-logo-img-official" onerror="this.src='static/assets/raksha_flow_logo.svg'">
       </div>
 
       <div class="rf-header-actions">
@@ -24,7 +24,7 @@
         </button>
 
         <div class="rf-avatar" onclick="navigateTo('medical-id')" id="userHeaderAvatar">
-          EV
+          RF
         </div>
       </div>
     </header>
@@ -38,9 +38,9 @@
       <section id="view-login" class="rf-view active">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
           
-          <!-- Exact Official Logo Header -->
+          <!-- Native Vector Logo (Zero White Rectangle) -->
           <div style="margin-bottom: 20px;">
-            <img src="assets/raksha_flow_logo_official.jpg" alt="Raksha Flow" style="height: 60px; width: auto; max-width: 280px; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo_official.jpg'">
+            <img src="assets/raksha_flow_logo.svg" alt="RAKSHA FLOW" style="height: 64px; width: auto; max-width: 290px; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo.svg'">
             <div style="font-size: 13px; color: var(--rf-text-secondary); margin-top: 6px; font-weight: 500;">Your Safety. Our Priority.</div>
           </div>
 
@@ -58,7 +58,7 @@
               <div class="rf-form-group">
                 <label class="rf-label">Email or Username</label>
                 <div class="rf-input-wrapper">
-                  <input type="email" id="loginEmail" class="rf-input" value="demo@carevoice.app" placeholder="name@example.com" required>
+                  <input type="email" id="loginEmail" class="rf-input" value="rahul@rakshaflow.app" placeholder="name@example.com" required>
                 </div>
               </div>
 
@@ -106,7 +106,7 @@
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
           
           <div style="margin-bottom: 16px;">
-            <img src="assets/raksha_flow_logo_official.jpg" alt="Raksha Flow Logo" style="height: 56px; width: auto; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo_official.jpg'">
+            <img src="assets/raksha_flow_logo.svg" alt="RAKSHA FLOW" style="height: 56px; width: auto; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo.svg'">
           </div>
 
           <div class="rf-card" style="width: 100%; max-width: 380px;">
@@ -116,7 +116,7 @@
             <form id="signupForm" onsubmit="handleAuthSignup(event)">
               <div class="rf-form-group">
                 <label class="rf-label">Full Name</label>
-                <input type="text" id="signupName" class="rf-input" placeholder="Eleanor Vance" required>
+                <input type="text" id="signupName" class="rf-input" placeholder="Rahul Sharma" required>
               </div>
 
               <div class="rf-form-group">
@@ -175,8 +175,12 @@
       <!-- ========================================== -->
       <section id="view-dashboard" class="rf-view">
         
-        <!-- Status Pill Centered Below Header -->
-        <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+        <!-- User Greeting & Protection Status Pill -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 id="dashGreeting" style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700; color: #fff;">Good Afternoon</h2>
+            <div style="font-size: 12px; color: var(--rf-text-secondary);">System active & monitoring</div>
+          </div>
           <span class="rf-status-pill" id="dashProtectionBadge">
             <div class="rf-dot-active"></div>
             <span id="dashProtectionBadgeText">Protection Active</span>
@@ -267,7 +271,7 @@
               <span id="liveLat">12.9716° N</span>, <span id="liveLng">77.5946° E</span>
             </div>
             <p id="liveAddress" style="font-size: 12px; color: var(--rf-text-secondary); margin-bottom: 12px;">
-              Bengaluru, Karnataka, India
+              Acquiring location...
             </p>
             <div style="display: flex; gap: 10px;">
               <button class="rf-btn rf-btn-primary" style="padding: 8px 14px; font-size: 12px; flex: 1;" onclick="navigateTo('live-location')">View on Map</button>
@@ -284,7 +288,7 @@
             <div id="dashContactsAvatars" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
               <!-- Rendered via JS -->
             </div>
-            <div style="font-size: 12px; color: var(--rf-text-secondary);" id="dashContactCountStr">3 Contacts Ready</div>
+            <div style="font-size: 12px; color: var(--rf-text-secondary);" id="dashContactCountStr">0 Contacts Ready</div>
           </div>
 
           <!-- Medical ID Card -->
@@ -364,7 +368,7 @@
 
           <div class="rf-form-group" style="text-align: left; max-width: 400px; margin: 0 auto 20px auto;">
             <label class="rf-label">Customize Spoken Trigger Phrase</label>
-            <input type="text" id="triggerWordInput" class="rf-input" value="HELP EMERGENCY" placeholder="e.g. HELP EMERGENCY, SAVE ME">
+            <input type="text" id="triggerWordInput" class="rf-input" value="HELP" placeholder="e.g. HELP, SAVE ME">
             <button class="rf-btn rf-btn-primary" style="margin-top: 8px;" onclick="updateTriggerWord()">Update Trigger Word</button>
           </div>
 
@@ -398,7 +402,7 @@
               <span id="detailLat">12.9716° N</span>, <span id="detailLng">77.5946° E</span>
             </div>
             <div id="detailAddress" style="font-size: 13px; color: var(--rf-text-secondary);">
-              Bengaluru, Karnataka, India
+              Acquiring address...
             </div>
             <div style="font-size: 11px; color: var(--rf-text-muted);">
               ● Last Updated: <span id="detailLocationTimestamp">Just Now</span>
@@ -481,22 +485,22 @@
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
               <div style="font-size: 11px; color: var(--rf-text-secondary);">PATIENT NAME</div>
-              <div id="profileName" style="font-size: 15px; font-weight: 700; color: #fff;">Eleanor Vance</div>
+              <div id="profileName" style="font-size: 15px; font-weight: 700; color: #fff;">-</div>
             </div>
 
             <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
               <div style="font-size: 11px; color: var(--rf-text-secondary);">KNOWN ALLERGIES</div>
-              <div id="profileAllergies" style="font-size: 14px; font-weight: 600;">Penicillin, Peanuts</div>
+              <div id="profileAllergies" style="font-size: 14px; font-weight: 600;">None</div>
             </div>
 
             <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
               <div style="font-size: 11px; color: var(--rf-text-secondary);">CURRENT MEDICATIONS</div>
-              <div id="profileMedicines" style="font-size: 14px; font-weight: 600;">Lisinopril 10mg, Metformin 500mg</div>
+              <div id="profileMedicines" style="font-size: 14px; font-weight: 600;">None</div>
             </div>
 
             <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
               <div style="font-size: 11px; color: var(--rf-text-secondary);">CHRONIC CONDITIONS</div>
-              <div id="profileConditions" style="font-size: 14px; font-weight: 600;">Hypertension, Type 2 Diabetes</div>
+              <div id="profileConditions" style="font-size: 14px; font-weight: 600;">None</div>
             </div>
 
             <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
