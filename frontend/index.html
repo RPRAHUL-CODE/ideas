@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RAKSHA FLOW | AI-Powered Emergency Response</title>
-  <meta name="description" content="Raksha Flow is an AI-powered emergency-response platform providing hands-free voice trigger protection, live GPS sharing, and caregiver escalation.">
+  <meta name="description" content="Raksha Flow is an AI-powered emergency-response application providing hands-free voice trigger protection, live GPS sharing, and caregiver escalation.">
   <link rel="stylesheet" href="static/css/style.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -15,26 +15,10 @@
     <!-- Top Header Navigation -->
     <header id="appHeader" class="rf-header" style="display: none;">
       <div class="rf-brand-group" onclick="navigateTo('dashboard')">
-        <svg class="rf-logo-img" viewBox="0 0 300 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M40 10 L70 20 V45 C70 65 40 75 40 75 C40 75 10 65 10 45 V20 Z" stroke="url(#rf-grad)" stroke-width="4" fill="none"/>
-          <path d="M22 42 C30 35, 38 48, 50 38" stroke="url(#rf-grad)" stroke-width="4" stroke-linecap="round"/>
-          <path d="M48 34 L58 38 L48 44" fill="none" stroke="url(#rf-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-          <text x="85" y="48" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="28" letter-spacing="1">RAKSHA FLOW</text>
-          <defs>
-            <linearGradient id="rf-grad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#06b6d4"/>
-              <stop offset="1" stop-color="#2563eb"/>
-            </linearGradient>
-          </defs>
-        </svg>
+        <img src="assets/raksha_flow_logo_official.jpg" alt="Raksha Flow Logo" class="rf-logo-img-official" onerror="this.src='static/assets/raksha_flow_logo_official.jpg'">
       </div>
 
       <div class="rf-header-actions">
-        <div id="headerProtectionStatus" class="rf-status-pill">
-          <div class="rf-dot-active"></div>
-          <span id="headerStatusText">Protection Active</span>
-        </div>
-
         <button class="rf-icon-btn" onclick="navigateTo('history')" title="Notifications & Event Log">
           🔔
         </button>
@@ -54,21 +38,10 @@
       <section id="view-login" class="rf-view active">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
           
-          <!-- Logo & Brand Header -->
+          <!-- Exact Official Logo Header -->
           <div style="margin-bottom: 20px;">
-            <svg viewBox="0 0 300 80" style="width: 240px; height: 64px;" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M40 10 L70 20 V45 C70 65 40 75 40 75 C40 75 10 65 10 45 V20 Z" stroke="url(#rf-grad-login)" stroke-width="4" fill="none"/>
-              <path d="M22 42 C30 35, 38 48, 50 38" stroke="url(#rf-grad-login)" stroke-width="4" stroke-linecap="round"/>
-              <path d="M48 34 L58 38 L48 44" fill="none" stroke="url(#rf-grad-login)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="85" y="48" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="28" letter-spacing="1">RAKSHA FLOW</text>
-              <defs>
-                <linearGradient id="rf-grad-login" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#06b6d4"/>
-                  <stop offset="1" stop-color="#2563eb"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <div style="font-size: 13px; color: var(--rf-text-secondary); margin-top: 4px; font-weight: 500;">Your Safety. Our Priority.</div>
+            <img src="assets/raksha_flow_logo_official.jpg" alt="Raksha Flow" style="height: 60px; width: auto; max-width: 280px; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo_official.jpg'">
+            <div style="font-size: 13px; color: var(--rf-text-secondary); margin-top: 6px; font-weight: 500;">Your Safety. Our Priority.</div>
           </div>
 
           <!-- Animated ECG Waveform -->
@@ -109,7 +82,6 @@
               <div style="flex: 1; height: 1px; background: var(--rf-navy-card-border);"></div>
             </div>
 
-            <!-- Google Authentication Button -->
             <button type="button" class="rf-btn rf-btn-google" style="width: 100%;" onclick="handleGoogleAuth()">
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -134,18 +106,7 @@
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
           
           <div style="margin-bottom: 16px;">
-            <svg viewBox="0 0 300 80" style="width: 220px; height: 58px;" fill="none">
-              <path d="M40 10 L70 20 V45 C70 65 40 75 40 75 C40 75 10 65 10 45 V20 Z" stroke="url(#rf-grad-signup)" stroke-width="4" fill="none"/>
-              <path d="M22 42 C30 35, 38 48, 50 38" stroke="url(#rf-grad-signup)" stroke-width="4" stroke-linecap="round"/>
-              <path d="M48 34 L58 38 L48 44" fill="none" stroke="url(#rf-grad-signup)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="85" y="48" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="28" letter-spacing="1">RAKSHA FLOW</text>
-              <defs>
-                <linearGradient id="rf-grad-signup" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#06b6d4"/>
-                  <stop offset="1" stop-color="#2563eb"/>
-                </linearGradient>
-              </defs>
-            </svg>
+            <img src="assets/raksha_flow_logo_official.jpg" alt="Raksha Flow Logo" style="height: 56px; width: auto; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo_official.jpg'">
           </div>
 
           <div class="rf-card" style="width: 100%; max-width: 380px;">
@@ -214,20 +175,33 @@
       <!-- ========================================== -->
       <section id="view-dashboard" class="rf-view">
         
-        <!-- User Welcome Banner -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <div>
-            <h2 id="dashGreeting" style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700; color: #fff;">Good Evening, Eleanor</h2>
-            <div style="font-size: 12px; color: var(--rf-text-secondary);">Protection active & monitoring</div>
-          </div>
+        <!-- Status Pill Centered Below Header -->
+        <div style="display: flex; justify-content: center; margin-bottom: 12px;">
           <span class="rf-status-pill" id="dashProtectionBadge">
             <div class="rf-dot-active"></div>
-            <span>Protection Active</span>
+            <span id="dashProtectionBadgeText">Protection Active</span>
           </span>
         </div>
 
-        <!-- Active Dispatch Banner (Renders dynamically when SOS is triggered) -->
-        <div id="activeDispatchCard" class="rf-card" style="display: none; border-color: var(--rf-emergency-red); background: rgba(35, 12, 22, 0.85); margin-bottom: 20px;">
+        <!-- Prominent ECG Waveform Section -->
+        <div class="rf-ecg-container">
+          <canvas id="dashboardEcgCanvas" class="rf-ecg-canvas"></canvas>
+        </div>
+
+        <!-- Large Red SOS Control Section -->
+        <div class="rf-sos-wrapper">
+          <div class="rf-sos-ring-outer">
+            <div class="rf-sos-ring-inner">
+              <button class="rf-sos-button" onclick="triggerEmergencyAlert('MANUAL_BUTTON')">
+                <span class="rf-sos-text">SOS</span>
+                <span class="rf-sos-subtext">Hold to Activate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Dispatch Card Banner (Renders dynamically when SOS is active) -->
+        <div id="activeDispatchCard" class="rf-card" style="display: none; border-color: var(--rf-emergency-red); background: rgba(35, 12, 22, 0.88); margin-bottom: 20px;">
           <div class="rf-card-header">
             <span class="rf-card-title" style="color: var(--rf-emergency-red);">🚨 ACTIVE EMERGENCY ALERT DISPATCHED</span>
             <span id="dispatchStatusBadge" class="rf-status-pill" style="background: rgba(239, 68, 68, 0.2); color: var(--rf-emergency-red); border-color: var(--rf-emergency-red);">PRIMARY CONTACTS ALERTED</span>
@@ -257,22 +231,9 @@
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; pt: 10px; border-top: 1px solid var(--rf-navy-card-border);">
-            <span style="font-size: 11px; color: var(--rf-text-secondary);">Level 2 Backup Escalation in <strong id="escalationCountdown" style="color: #f59e0b;">120s</strong></span>
+            <span style="font-size: 11px; color: var(--rf-text-secondary);">Backup Escalation in <strong id="escalationCountdown" style="color: #f59e0b;">120s</strong></span>
             <button class="rf-btn rf-btn-primary" style="padding: 6px 14px; font-size: 12px;" onclick="handleAcknowledgeCurrentSOS()">✅ Acknowledge & Resolve SOS</button>
           </div>
-        </div>
-
-        <!-- Animated ECG Section -->
-        <div class="rf-ecg-container">
-          <canvas id="dashboardEcgCanvas" class="rf-ecg-canvas"></canvas>
-        </div>
-
-        <!-- Main SOS Control Section -->
-        <div class="rf-sos-wrapper">
-          <button class="rf-sos-button" onclick="triggerEmergencyAlert('MANUAL_BUTTON')">
-            <span class="rf-sos-text">SOS</span>
-            <span class="rf-sos-subtext">Hold to Activate</span>
-          </button>
         </div>
 
         <!-- Dashboard Feature Grid -->
@@ -291,7 +252,7 @@
               Say <strong style="color: var(--rf-cyan-accent);" id="dashTriggerWordStr">"HELP"</strong> to activate emergency assistance.
             </p>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--rf-cyan-accent); font-weight: 600;">
-              <span>Continuous Ambient Keyword Detection</span>
+              <span>Ambient Keyword Monitoring</span>
               <span>Configure →</span>
             </div>
           </div>
@@ -428,7 +389,6 @@
             <span id="detailLocationAccuracyTag" class="rf-status-pill">GPS Active</span>
           </div>
 
-          <!-- Interactive Map Preview Box -->
           <div style="width: 100%; height: 220px; border-radius: var(--rf-radius-md); overflow: hidden; position: relative; margin-bottom: 16px; border: 1px solid var(--rf-navy-card-border); background: #0c1527;">
             <iframe id="mapPreviewIframe" width="100%" height="100%" frameborder="0" style="border:0;" src="https://maps.google.com/maps?q=12.9716,77.5946&z=15&output=embed" allowfullscreen></iframe>
           </div>
@@ -581,14 +541,12 @@
             Emergency triage assistant. Type or speak your symptoms below.
           </p>
 
-          <!-- Quick Suggestion Chips -->
           <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
             <button class="rf-btn rf-btn-primary" style="padding: 5px 10px; font-size: 11px;" onclick="sendQuickChatMessage('I am experiencing chest pain and left arm numbness')">🚨 Chest Pain</button>
             <button class="rf-btn rf-btn-primary" style="padding: 5px 10px; font-size: 11px;" onclick="sendQuickChatMessage('What are the first aid steps for CPR?')">🫀 CPR Steps</button>
             <button class="rf-btn rf-btn-primary" style="padding: 5px 10px; font-size: 11px;" onclick="sendQuickChatMessage('First aid for minor burns')">🔥 Burn Care</button>
           </div>
 
-          <!-- Chat Stream Log -->
           <div id="chatMessagesContainer" style="height: 320px; overflow-y: auto; background: rgba(5, 8, 17, 0.7); border: 1px solid var(--rf-navy-card-border); border-radius: var(--rf-radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
             <div style="padding: 10px 14px; background: rgba(15, 23, 42, 0.8); border-radius: 12px; max-width: 85%; border-left: 3px solid var(--rf-cyan-accent);">
               <div style="font-size: 10px; color: var(--rf-cyan-accent); font-weight: 700;">HEALTHCARE AI</div>
@@ -596,7 +554,6 @@
             </div>
           </div>
 
-          <!-- Chat Form -->
           <form id="chatForm" onsubmit="handleHealthChatSubmit(event)" style="display: flex; gap: 8px;">
             <input type="text" id="chatInput" class="rf-input" placeholder="Describe symptoms or question..." required style="flex: 1;">
             <button type="button" class="rf-btn rf-btn-primary" style="padding: 10px 14px;" onclick="handleVoiceChatInput()">🎙️</button>
@@ -607,7 +564,7 @@
 
     </main>
 
-    <!-- Desktop Feature Highlights Footer Bar -->
+    <!-- Desktop Feature Highlights Footer -->
     <footer class="rf-feature-bar">
       <div class="rf-feature-item">
         <div class="rf-feature-icon">🚨</div>
@@ -650,7 +607,7 @@
       </div>
     </footer>
 
-    <!-- Mobile Bottom Navigation Bar -->
+    <!-- Mobile Sticky Bottom Navigation Bar -->
     <nav id="mobileBottomNav" class="rf-bottom-nav">
       <button class="rf-nav-item active" onclick="navigateTo('dashboard')" id="navItemHome">
         <span class="rf-nav-icon">🏠</span>

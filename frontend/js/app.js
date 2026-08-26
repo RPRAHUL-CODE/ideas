@@ -70,7 +70,7 @@ function handleAuthSignup(event) {
 }
 
 function handleGoogleAuth() {
-  alert("Google Authentication is UI ready. For full OAuth 2.0 integration, connect your Google Client ID in backend environment settings.");
+  alert("Google Authentication is UI ready. Connect your Google OAuth Client ID in backend environment settings to enable live single-sign-on.");
   showAuthenticatedUI();
   navigateTo('dashboard');
 }
@@ -135,14 +135,12 @@ function handleHashRoute() {
   const activeView = document.getElementById(targetViewId);
   if (activeView) activeView.classList.add('active');
 
-  // Toggle Header / Bottom Nav based on Auth View
   const isAuthView = targetViewId === 'view-login' || targetViewId === 'view-signup';
   const header = document.getElementById('appHeader');
   const bottomNav = document.getElementById('mobileBottomNav');
   if (header) header.style.display = isAuthView ? 'none' : 'flex';
   if (bottomNav) bottomNav.style.display = isAuthView ? 'none' : 'flex';
 
-  // Update Nav Items active class
   document.querySelectorAll('.rf-nav-item').forEach(i => i.classList.remove('active'));
   if (hash === 'dashboard' || !hash) document.getElementById('navItemHome')?.classList.add('active');
   if (hash === 'contacts') document.getElementById('navItemContacts')?.classList.add('active');
@@ -154,7 +152,7 @@ function navigateTo(route) {
   handleHashRoute();
 }
 
-// --- Smooth Animated ECG Canvas ---
+// --- Smooth Animated ECG Canvas with Glowing Leading Dot ---
 function initEcgAnimations() {
   setupEcgCanvas('loginEcgCanvas');
   setupEcgCanvas('dashboardEcgCanvas');
@@ -180,19 +178,19 @@ function setupEcgCanvas(canvasId) {
     const h = canvas.height;
     const midY = h / 2;
 
-    ctx.fillStyle = 'rgba(5, 8, 17, 0.2)';
+    ctx.fillStyle = 'rgba(5, 8, 17, 0.22)';
     ctx.fillRect(0, 0, w, h);
 
     ctx.beginPath();
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.strokeStyle = '#06b6d4';
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 10;
     ctx.shadowColor = '#06b6d4';
 
     const prevX = x;
     const prevY = getEcgY(prevX, midY, step);
     
-    x = (x + 2) % w;
+    x = (x + 2.2) % w;
     step += 0.05;
 
     const newY = getEcgY(x, midY, step);
@@ -201,16 +199,24 @@ function setupEcgCanvas(canvasId) {
     ctx.lineTo(x, newY);
     ctx.stroke();
 
+    // Glowing Leading Pulse Dot (Matching UI Reference)
+    ctx.beginPath();
+    ctx.arc(x, newY, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#06b6d4';
+    ctx.fill();
+
     ecgAnimationFrames[canvasId] = requestAnimationFrame(draw);
   }
 
   function getEcgY(posX, midY, t) {
     const cycle = (posX % 120);
-    if (cycle > 45 && cycle < 50) return midY - 12; // P wave
-    if (cycle >= 50 && cycle < 53) return midY + 8;  // Q wave
-    if (cycle >= 53 && cycle < 58) return midY - 24; // R wave spike
-    if (cycle >= 58 && cycle < 62) return midY + 14; // S wave
-    if (cycle >= 70 && cycle < 80) return midY - 8;  // T wave
+    if (cycle > 45 && cycle < 50) return midY - 12;
+    if (cycle >= 50 && cycle < 53) return midY + 8;
+    if (cycle >= 53 && cycle < 58) return midY - 26; // R wave spike
+    if (cycle >= 58 && cycle < 62) return midY + 14;
+    if (cycle >= 70 && cycle < 80) return midY - 8;
     return midY + (Math.sin(posX * 0.05 + t) * 1.5);
   }
 
@@ -284,7 +290,7 @@ function playEmergencyBeep() {
   }
 }
 
-// --- Voice Listener & Protection State ---
+// --- Voice Listener & Truthful System State ---
 function initVoiceListener() {
   voiceListener.startListening(
     (triggerData) => {
@@ -302,8 +308,8 @@ function initVoiceListener() {
 function toggleVoiceProtectionState() {
   const toggleBtn = document.getElementById('toggleVoiceBtn');
   const dashBadge = document.getElementById('dashVoiceBadge');
-  const headerBadge = document.getElementById('headerProtectionStatus');
-  const dashHeaderBadge = document.getElementById('dashProtectionBadge');
+  const dashHeaderBadge = document.getElementById('dashProtectionBadgeText');
+  const dashHeaderBadgePill = document.getElementById('dashProtectionBadge');
 
   if (voiceListener.isListening) {
     voiceListener.stopListening();
@@ -315,13 +321,11 @@ function toggleVoiceProtectionState() {
       dashBadge.className = "rf-status-pill offline";
       dashBadge.innerHTML = '<span>Paused</span>';
     }
-    if (headerBadge) {
-      headerBadge.className = "rf-status-pill offline";
-      document.getElementById('headerStatusText').textContent = "Protection Paused";
+    if (dashHeaderBadgePill) {
+      dashHeaderBadgePill.className = "rf-status-pill offline";
     }
     if (dashHeaderBadge) {
-      dashHeaderBadge.className = "rf-status-pill offline";
-      dashHeaderBadge.innerHTML = '<span>Protection Paused</span>';
+      dashHeaderBadge.textContent = "Protection Paused";
     }
   } else {
     voiceListener.startListening(
@@ -336,13 +340,11 @@ function toggleVoiceProtectionState() {
       dashBadge.className = "rf-status-pill";
       dashBadge.innerHTML = '<div class="rf-dot-active"></div><span>Listening...</span>';
     }
-    if (headerBadge) {
-      headerBadge.className = "rf-status-pill";
-      document.getElementById('headerStatusText').textContent = "Protection Active";
+    if (dashHeaderBadgePill) {
+      dashHeaderBadgePill.className = "rf-status-pill";
     }
     if (dashHeaderBadge) {
-      dashHeaderBadge.className = "rf-status-pill";
-      dashHeaderBadge.innerHTML = '<div class="rf-dot-active"></div><span>Protection Active</span>';
+      dashHeaderBadge.textContent = "Protection Active";
     }
   }
 }
@@ -433,7 +435,6 @@ function renderActiveDispatchBanner(sosResponse) {
     `).join('');
   }
 
-  // Start 120s Escalation timer
   escalationTimerSeconds = 120;
   const countEl = document.getElementById('escalationCountdown');
   if (escalationTimer) clearInterval(escalationTimer);
@@ -471,15 +472,6 @@ async function loadProfile() {
   const user = await EmergencyAPI.getProfile(currentUserId);
   if (user) {
     currentUserProfile = { ...currentUserProfile, ...user };
-    
-    // Greeting
-    const greetingEl = document.getElementById('dashGreeting');
-    if (greetingEl) {
-      const hour = new Date().getHours();
-      const timeSalutation = hour < 12 ? 'Good Morning' : (hour < 18 ? 'Good Afternoon' : 'Good Evening');
-      const firstName = (user.full_name || 'Eleanor').split(' ')[0];
-      greetingEl.textContent = `${timeSalutation}, ${firstName}`;
-    }
 
     const elements = {
       'profileName': user.full_name,
@@ -671,7 +663,6 @@ async function downloadMedicalSummary() {
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", jsonStr);
   downloadAnchor.setAttribute("download", `RakshaFlow_Medical_Card_${currentUserId}.json`);
-  document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
 }
