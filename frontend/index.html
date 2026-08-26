@@ -15,7 +15,7 @@
     <!-- Top Header Navigation -->
     <header id="appHeader" class="rf-header" style="display: none;">
       <div class="rf-brand-group" onclick="navigateTo('dashboard')">
-        <img src="assets/raksha_flow_logo.svg" alt="RAKSHA FLOW" class="rf-logo-img-official" onerror="this.src='static/assets/raksha_flow_logo.svg'">
+        <img src="assets/raksha_flow_logo_official_v2.jpg" alt="RAKSHA FLOW" class="rf-logo-img-official" onerror="this.src='assets/raksha_flow_logo.svg'">
       </div>
 
       <div class="rf-header-actions">
@@ -38,9 +38,9 @@
       <section id="view-login" class="rf-view active">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
           
-          <!-- Native Vector Logo (Zero White Rectangle) -->
+          <!-- Official Logo Header (Zero White Rectangle) -->
           <div style="margin-bottom: 20px;">
-            <img src="assets/raksha_flow_logo.svg" alt="RAKSHA FLOW" style="height: 64px; width: auto; max-width: 290px; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo.svg'">
+            <img src="assets/raksha_flow_logo_official_v2.jpg" alt="RAKSHA FLOW" style="height: 64px; width: auto; max-width: 290px; object-fit: contain; background: transparent;" onerror="this.src='assets/raksha_flow_logo.svg'">
             <div style="font-size: 13px; color: var(--rf-text-secondary); margin-top: 6px; font-weight: 500;">Your Safety. Our Priority.</div>
           </div>
 
@@ -106,7 +106,7 @@
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
           
           <div style="margin-bottom: 16px;">
-            <img src="assets/raksha_flow_logo.svg" alt="RAKSHA FLOW" style="height: 56px; width: auto; object-fit: contain;" onerror="this.src='static/assets/raksha_flow_logo.svg'">
+            <img src="assets/raksha_flow_logo_official_v2.jpg" alt="RAKSHA FLOW" style="height: 56px; width: auto; object-fit: contain;" onerror="this.src='assets/raksha_flow_logo.svg'">
           </div>
 
           <div class="rf-card" style="width: 100%; max-width: 380px;">
@@ -243,8 +243,8 @@
         <!-- Dashboard Feature Grid -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
 
-          <!-- Voice Protection Card -->
-          <div class="rf-card" onclick="navigateTo('voice-protection')" style="cursor: pointer;">
+          <!-- Voice Protection Card with Edit Trigger Button -->
+          <div class="rf-card">
             <div class="rf-card-header">
               <span class="rf-card-title">🎙️ Voice Protection</span>
               <span id="dashVoiceBadge" class="rf-status-pill">
@@ -255,9 +255,9 @@
             <p style="font-size: 13px; color: var(--rf-text-secondary); margin-bottom: 10px;">
               Say <strong style="color: var(--rf-cyan-accent);" id="dashTriggerWordStr">"HELP"</strong> to activate emergency assistance.
             </p>
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--rf-cyan-accent); font-weight: 600;">
-              <span>Ambient Keyword Monitoring</span>
-              <span>Configure →</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <button class="rf-btn rf-btn-primary" style="padding: 6px 12px; font-size: 11px;" onclick="openEditTriggerModal()">✏️ Edit Trigger</button>
+              <button class="rf-card-action" onclick="navigateTo('voice-protection')">Voice Settings →</button>
             </div>
           </div>
 
@@ -360,16 +360,15 @@
           </div>
 
           <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Listening for trigger word</h3>
-          <div style="font-size: 22px; font-weight: 800; color: var(--rf-cyan-accent); margin-bottom: 16px;" id="voiceTriggerDisplayStr">"HELP"</div>
+          <div style="font-size: 24px; font-weight: 800; color: var(--rf-cyan-accent); margin-bottom: 16px;" id="voiceTriggerDisplayStr">"HELP"</div>
 
-          <div style="padding: 14px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm); border: 1px solid var(--rf-navy-card-border); font-size: 12px; color: var(--rf-text-secondary); margin-bottom: 24px;">
-            💡 <strong>Tip:</strong> You can say "HELP" anytime hands-free to activate immediate emergency assistance.
+          <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+            <button class="rf-btn rf-btn-primary" style="padding: 8px 16px; font-size: 12px;" onclick="openEditTriggerModal()">✏️ Edit Trigger</button>
+            <button class="rf-btn" style="padding: 8px 16px; font-size: 12px; background: rgba(239,68,68,0.2); color: var(--rf-emergency-red); border: 1px solid var(--rf-emergency-red);" onclick="handleDeleteCustomTrigger()">🗑️ Delete Custom Trigger</button>
           </div>
 
-          <div class="rf-form-group" style="text-align: left; max-width: 400px; margin: 0 auto 20px auto;">
-            <label class="rf-label">Customize Spoken Trigger Phrase</label>
-            <input type="text" id="triggerWordInput" class="rf-input" value="HELP" placeholder="e.g. HELP, SAVE ME">
-            <button class="rf-btn rf-btn-primary" style="margin-top: 8px;" onclick="updateTriggerWord()">Update Trigger Word</button>
+          <div style="padding: 14px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm); border: 1px solid var(--rf-navy-card-border); font-size: 12px; color: var(--rf-text-secondary); margin-bottom: 24px;">
+            💡 <strong>Tip:</strong> You can say your trigger phrase anytime hands-free to activate immediate emergency assistance.
           </div>
 
           <button id="toggleVoiceBtn" class="rf-btn rf-btn-danger" style="width: 100%; max-width: 320px;" onclick="toggleVoiceProtectionState()">
@@ -652,6 +651,29 @@
       <button class="rf-btn rf-btn-danger" style="width: 100%; padding: 14px; font-size: 15px;" onclick="cancelEmergencyAlert()">
         CANCEL EMERGENCY ALERT
       </button>
+    </div>
+  </div>
+
+  <!-- Edit Voice Trigger Modal -->
+  <div id="editTriggerModal" class="rf-modal-overlay">
+    <div class="rf-sos-modal-content" style="border-color: var(--rf-cyan-accent); box-shadow: 0 0 50px var(--rf-cyan-glow); text-align: left;">
+      <h3 style="font-family: var(--rf-font-display); font-size: 20px; color: #fff; margin-bottom: 6px;">Voice Trigger Settings</h3>
+      <p style="font-size: 12px; color: var(--rf-text-secondary); margin-bottom: 16px;">
+        Customize the spoken phrase your device listens for.
+      </p>
+
+      <form id="editTriggerForm" onsubmit="handleSaveCustomTrigger(event)">
+        <div class="rf-form-group">
+          <label class="rf-label">Trigger Word / Phrase</label>
+          <input type="text" id="modalTriggerWordInput" class="rf-input" placeholder="e.g. HELP, RAKSHA, SAVE ME" required style="font-size: 16px; font-weight: 700; color: var(--rf-cyan-accent);">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 18px;">
+          <button type="submit" class="rf-btn rf-btn-primary" style="width: 100%;">Save Trigger</button>
+          <button type="button" class="rf-btn" style="background: rgba(239,68,68,0.2); color: var(--rf-emergency-red); border: 1px solid var(--rf-emergency-red);" onclick="handleDeleteCustomTrigger()">Reset to Default ("HELP")</button>
+          <button type="button" class="rf-btn" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="closeEditTriggerModal()">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 

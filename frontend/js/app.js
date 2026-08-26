@@ -158,7 +158,7 @@ function navigateTo(route) {
   handleHashRoute();
 }
 
-// --- Smooth Animated ECG Canvas with Glowing Leading Dot ---
+// --- Smooth Animated ECG Canvas ---
 function initEcgAnimations() {
   setupEcgCanvas('loginEcgCanvas');
   setupEcgCanvas('dashboardEcgCanvas');
@@ -220,7 +220,7 @@ function setupEcgCanvas(canvasId) {
     const cycle = (posX % 120);
     if (cycle > 45 && cycle < 50) return midY - 12;
     if (cycle >= 50 && cycle < 53) return midY + 8;
-    if (cycle >= 53 && cycle < 58) return midY - 26; // R wave spike
+    if (cycle >= 53 && cycle < 58) return midY - 26;
     if (cycle >= 58 && cycle < 62) return midY + 14;
     if (cycle >= 70 && cycle < 80) return midY - 8;
     return midY + (Math.sin(posX * 0.05 + t) * 1.5);
@@ -296,8 +296,11 @@ function playEmergencyBeep() {
   }
 }
 
-// --- Voice Listener & Truthful System State ---
+// --- Voice Listener & Editable Trigger Engine ---
 function initVoiceListener() {
+  const activeTrigger = localStorage.getItem('rf_custom_trigger') || currentUserProfile.trigger_word || "HELP";
+  voiceListener.setTargetTrigger(activeTrigger);
+
   voiceListener.startListening(
     (triggerData) => {
       triggerEmergencyAlert("VOICE_KEYWORD", triggerData.spoken_phrase);
@@ -309,6 +312,63 @@ function initVoiceListener() {
       }
     }
   );
+}
+
+function openEditTriggerModal() {
+  const currentTrigger = localStorage.getItem('rf_custom_trigger') || currentUserProfile.trigger_word || "HELP";
+  const input = document.getElementById('modalTriggerWordInput');
+  if (input) input.value = currentTrigger;
+  document.getElementById('editTriggerModal').classList.add('active');
+}
+
+function closeEditTriggerModal() {
+  document.getElementById('editTriggerModal').classList.remove('active');
+}
+
+async function handleSaveCustomTrigger(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById('modalTriggerWordInput');
+  const newTrigger = input.value.trim().toUpperCase();
+  if (!newTrigger) return alert("Please enter a valid trigger word or phrase.");
+
+  currentUserProfile.trigger_word = newTrigger;
+  localStorage.setItem('rf_custom_trigger', newTrigger);
+  sessionStorage.setItem('rf_authenticated_user', JSON.stringify(currentUserProfile));
+
+  try {
+    await EmergencyAPI.updateProfile(currentUserId, { trigger_word: newTrigger });
+  } catch (e) {}
+
+  voiceListener.setTargetTrigger(newTrigger);
+  closeEditTriggerModal();
+  updateTriggerUIDisplays(newTrigger);
+  alert(`Voice trigger updated to: "${newTrigger}". Speech recognition is now listening for "${newTrigger}".`);
+}
+
+async function handleDeleteCustomTrigger() {
+  if (confirm("Are you sure you want to remove this custom trigger?")) {
+    const defaultTrigger = "HELP";
+    currentUserProfile.trigger_word = defaultTrigger;
+    localStorage.removeItem('rf_custom_trigger');
+    sessionStorage.setItem('rf_authenticated_user', JSON.stringify(currentUserProfile));
+
+    try {
+      await EmergencyAPI.updateProfile(currentUserId, { trigger_word: defaultTrigger });
+    } catch (e) {}
+
+    voiceListener.setTargetTrigger(defaultTrigger);
+    closeEditTriggerModal();
+    updateTriggerUIDisplays(defaultTrigger);
+    alert(`Custom trigger removed. Reverted to default trigger: "${defaultTrigger}".`);
+  }
+}
+
+function updateTriggerUIDisplays(triggerStr) {
+  const dashStr = document.getElementById('dashTriggerWordStr');
+  if (dashStr) dashStr.textContent = `"${triggerStr}"`;
+
+  const voiceDetailStr = document.getElementById('voiceTriggerDisplayStr');
+  if (voiceDetailStr) voiceDetailStr.textContent = `"${triggerStr}"`;
 }
 
 function toggleVoiceProtectionState() {
@@ -472,13 +532,18 @@ async function handleAcknowledgeCurrentSOS() {
   loadHistory();
 }
 
-// --- Data Loading & Dynamic User Profile ---
+// --- Data Loading & Profile Management ---
 async function loadProfile() {
   const user = await EmergencyAPI.getProfile(currentUserId);
   if (user) {
     currentUserProfile = { ...currentUserProfile, ...user };
 
-    // Dynamic Greeting using logged-in user's First Name
+    // Restore saved custom trigger word if present
+    const savedTrigger = localStorage.getItem('rf_custom_trigger') || currentUserProfile.trigger_word || "HELP";
+    currentUserProfile.trigger_word = savedTrigger;
+    voiceListener.setTargetTrigger(savedTrigger);
+    updateTriggerUIDisplays(savedTrigger);
+
     const greetingEl = document.getElementById('dashGreeting');
     if (greetingEl) {
       const hour = new Date().getHours();
@@ -502,28 +567,7 @@ async function loadProfile() {
       const el = document.getElementById(id);
       if (el) el.textContent = val;
     }
-
-    const triggerInput = document.getElementById('triggerWordInput');
-    if (triggerInput) triggerInput.value = currentUserProfile.trigger_word || "HELP";
-
-    const triggerDisplay = document.getElementById('dashTriggerWordStr');
-    if (triggerDisplay) triggerDisplay.textContent = `"${currentUserProfile.trigger_word || 'HELP'}"`;
-
-    const voiceTriggerDetailDisplay = document.getElementById('voiceTriggerDisplayStr');
-    if (voiceTriggerDetailDisplay) voiceTriggerDetailDisplay.textContent = `"${currentUserProfile.trigger_word || 'HELP'}"`;
-
-    voiceListener.setTargetTrigger(currentUserProfile.trigger_word || "HELP");
   }
-}
-
-async function updateTriggerWord() {
-  const newTrigger = document.getElementById('triggerWordInput').value;
-  if (!newTrigger) return alert("Please enter a valid trigger phrase.");
-
-  await EmergencyAPI.updateProfile(currentUserId, { trigger_word: newTrigger });
-  voiceListener.setTargetTrigger(newTrigger);
-  loadProfile();
-  alert(`Trigger word updated to: "${newTrigger.toUpperCase()}"`);
 }
 
 async function loadContacts() {
@@ -572,7 +616,6 @@ async function loadContacts() {
   `).join('');
 }
 
-// Emergency Contacts Deletion Fix
 async function handleDeleteContact(contactId) {
   if (confirm("Are you sure you want to delete this emergency contact?")) {
     await EmergencyAPI.deleteContact(contactId, currentUserId);
@@ -640,7 +683,7 @@ async function loadHistory() {
   `).join('');
 }
 
-// Edit Medical Profile Modal Fix
+// Edit Medical Profile Modal
 function openEditProfileModal() {
   document.getElementById('editName').value = currentUserProfile.full_name || '';
   document.getElementById('editBlood').value = currentUserProfile.blood_group || 'O+';
