@@ -1,4 +1,15 @@
 let currentUserId = 1;
+let currentUserProfile = {
+  full_name: "Eleanor Vance",
+  email: "demo@carevoice.app",
+  blood_group: "O+",
+  allergies: "Penicillin, Peanuts",
+  chronic_conditions: "Hypertension, Type 2 Diabetes",
+  medicines: "Lisinopril 10mg, Metformin 500mg",
+  preferred_hospital: "St. Mary's General Hospital",
+  trigger_word: "HELP EMERGENCY"
+};
+
 let countdownTimer = null;
 let countdownSeconds = 5;
 let audioContext = null;
@@ -7,31 +18,203 @@ let currentActiveSOSEventId = null;
 let escalationTimer = null;
 let escalationTimerSeconds = 120;
 
+let ecgAnimationFrames = {};
+
 document.addEventListener('DOMContentLoaded', () => {
-  initTabs();
-  loadProfile();
-  loadContacts();
-  loadHistory();
+  initAppRouting();
+  checkAuthSession();
   initVoiceListener();
   initLiveLocationTracker();
   animateWaveform();
+  initEcgAnimations();
 });
 
-// --- Tab Router ---
-function initTabs() {
-  const tabs = document.querySelectorAll('.tab-btn');
-  const sections = document.querySelectorAll('.tab-content');
+// --- Auth & Session State ---
+function checkAuthSession() {
+  const savedUser = sessionStorage.getItem('rf_authenticated_user');
+  if (savedUser) {
+    try {
+      currentUserProfile = JSON.parse(savedUser);
+      currentUserId = currentUserProfile.user_id || 1;
+      showAuthenticatedUI();
+    } catch (e) {
+      navigateTo('login');
+    }
+  } else {
+    navigateTo('login');
+  }
+}
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      sections.forEach(s => s.style.display = 'none');
+function handleAuthLogin(event) {
+  if (event) event.preventDefault();
+  const email = document.getElementById('loginEmail').value;
 
-      tab.classList.add('active');
-      const targetId = tab.getAttribute('data-target');
-      document.getElementById(targetId).style.display = 'block';
-    });
-  });
+  currentUserProfile.email = email;
+  sessionStorage.setItem('rf_authenticated_user', JSON.stringify(currentUserProfile));
+  
+  showAuthenticatedUI();
+  navigateTo('dashboard');
+}
+
+function handleAuthSignup(event) {
+  if (event) event.preventDefault();
+  const name = document.getElementById('signupName').value;
+  const email = document.getElementById('signupEmail').value;
+
+  currentUserProfile.full_name = name;
+  currentUserProfile.email = email;
+  sessionStorage.setItem('rf_authenticated_user', JSON.stringify(currentUserProfile));
+
+  showAuthenticatedUI();
+  navigateTo('dashboard');
+}
+
+function handleGoogleAuth() {
+  alert("Google Authentication is UI ready. For full OAuth 2.0 integration, connect your Google Client ID in backend environment settings.");
+  showAuthenticatedUI();
+  navigateTo('dashboard');
+}
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input) {
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁️';
+    }
+  }
+}
+
+function logoutUser() {
+  sessionStorage.removeItem('rf_authenticated_user');
+  navigateTo('login');
+}
+
+function showAuthenticatedUI() {
+  const header = document.getElementById('appHeader');
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if (header) header.style.display = 'flex';
+  if (bottomNav) bottomNav.style.display = 'flex';
+
+  const avatar = document.getElementById('userHeaderAvatar');
+  if (avatar && currentUserProfile.full_name) {
+    const initials = currentUserProfile.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    avatar.textContent = initials || 'EV';
+  }
+
+  loadProfile();
+  loadContacts();
+  loadHistory();
+}
+
+// --- App SPA Routing ---
+function initAppRouting() {
+  window.addEventListener('hashchange', handleHashRoute);
+}
+
+function handleHashRoute() {
+  const hash = window.location.hash.replace('#/', '').replace('#', '');
+  const viewMap = {
+    'login': 'view-login',
+    'signup': 'view-signup',
+    'dashboard': 'view-dashboard',
+    'voice-protection': 'view-voice',
+    'live-location': 'view-location',
+    'contacts': 'view-contacts',
+    'medical-id': 'view-medical-id',
+    'history': 'view-history',
+    'healthcare-ai': 'view-healthcare-ai'
+  };
+
+  const targetViewId = viewMap[hash] || (sessionStorage.getItem('rf_authenticated_user') ? 'view-dashboard' : 'view-login');
+  
+  document.querySelectorAll('.rf-view').forEach(v => v.classList.remove('active'));
+  const activeView = document.getElementById(targetViewId);
+  if (activeView) activeView.classList.add('active');
+
+  // Toggle Header / Bottom Nav based on Auth View
+  const isAuthView = targetViewId === 'view-login' || targetViewId === 'view-signup';
+  const header = document.getElementById('appHeader');
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if (header) header.style.display = isAuthView ? 'none' : 'flex';
+  if (bottomNav) bottomNav.style.display = isAuthView ? 'none' : 'flex';
+
+  // Update Nav Items active class
+  document.querySelectorAll('.rf-nav-item').forEach(i => i.classList.remove('active'));
+  if (hash === 'dashboard' || !hash) document.getElementById('navItemHome')?.classList.add('active');
+  if (hash === 'contacts') document.getElementById('navItemContacts')?.classList.add('active');
+  if (hash === 'medical-id') document.getElementById('navItemMore')?.classList.add('active');
+}
+
+function navigateTo(route) {
+  window.location.hash = `#/${route}`;
+  handleHashRoute();
+}
+
+// --- Smooth Animated ECG Canvas ---
+function initEcgAnimations() {
+  setupEcgCanvas('loginEcgCanvas');
+  setupEcgCanvas('dashboardEcgCanvas');
+  setupEcgCanvas('voiceEcgCanvas');
+}
+
+function setupEcgCanvas(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  let x = 0;
+  
+  function resize() {
+    canvas.width = canvas.parentElement.clientWidth || 300;
+    canvas.height = canvas.parentElement.clientHeight || 50;
+  }
+  resize();
+
+  let step = 0;
+  function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const midY = h / 2;
+
+    ctx.fillStyle = 'rgba(5, 8, 17, 0.2)';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#06b6d4';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#06b6d4';
+
+    const prevX = x;
+    const prevY = getEcgY(prevX, midY, step);
+    
+    x = (x + 2) % w;
+    step += 0.05;
+
+    const newY = getEcgY(x, midY, step);
+
+    ctx.moveTo(prevX, prevY);
+    ctx.lineTo(x, newY);
+    ctx.stroke();
+
+    ecgAnimationFrames[canvasId] = requestAnimationFrame(draw);
+  }
+
+  function getEcgY(posX, midY, t) {
+    const cycle = (posX % 120);
+    if (cycle > 45 && cycle < 50) return midY - 12; // P wave
+    if (cycle >= 50 && cycle < 53) return midY + 8;  // Q wave
+    if (cycle >= 53 && cycle < 58) return midY - 24; // R wave spike
+    if (cycle >= 58 && cycle < 62) return midY + 14; // S wave
+    if (cycle >= 70 && cycle < 80) return midY - 8;  // T wave
+    return midY + (Math.sin(posX * 0.05 + t) * 1.5);
+  }
+
+  draw();
 }
 
 // --- Live Location Tracker ---
@@ -45,17 +228,40 @@ async function initLiveLocationTracker() {
 }
 
 function updateLiveLocationUI(loc) {
-  const latEl = document.getElementById('liveLat');
-  const lngEl = document.getElementById('liveLng');
-  const addrEl = document.getElementById('liveAddress');
-  const tagEl = document.getElementById('liveAccuracyTag');
-  const mapLinkEl = document.getElementById('liveMapLinkAnchor');
+  const elements = {
+    'liveLat': `${loc.lat.toFixed(4)}° N`,
+    'detailLat': `${loc.lat.toFixed(4)}° N`,
+    'liveLng': `${loc.lng.toFixed(4)}° E`,
+    'detailLng': `${loc.lng.toFixed(4)}° E`,
+    'liveAddress': loc.address,
+    'detailAddress': loc.address,
+    'liveAccuracyTag': loc.accuracy,
+    'detailLocationAccuracyTag': loc.accuracy
+  };
 
-  if (latEl) latEl.textContent = `${loc.lat.toFixed(4)} N`;
-  if (lngEl) lngEl.textContent = `${loc.lng.toFixed(4)} E`;
-  if (addrEl) addrEl.textContent = loc.address;
-  if (tagEl) tagEl.textContent = loc.accuracy;
-  if (mapLinkEl) mapLinkEl.setAttribute('href', loc.mapLink);
+  for (const [id, val] of Object.entries(elements)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  const mapIframe = document.getElementById('mapPreviewIframe');
+  if (mapIframe) {
+    mapIframe.src = `https://maps.google.com/maps?q=${loc.lat},${loc.lng}&z=15&output=embed`;
+  }
+}
+
+function shareCurrentLocation() {
+  const loc = locationService.getLocationPayload();
+  if (navigator.share) {
+    navigator.share({
+      title: 'Raksha Flow Live Emergency Location',
+      text: `Live emergency GPS coordinates: ${loc.lat}, ${loc.lng}`,
+      url: loc.mapLink
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(loc.mapLink);
+    alert(`Live GPS Location copied to clipboard:\n${loc.mapLink}`);
+  }
 }
 
 // --- Audio Synthesizer Alarm ---
@@ -67,7 +273,7 @@ function playEmergencyBeep() {
     const osc = audioContext.createOscillator();
     const gain = audioContext.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
+    osc.frequency.setValueAtTime(880, audioContext.currentTime);
     gain.gain.setValueAtTime(0.3, audioContext.currentTime);
     osc.connect(gain);
     gain.connect(audioContext.destination);
@@ -78,11 +284,10 @@ function playEmergencyBeep() {
   }
 }
 
-// --- Voice Listener Initialization ---
+// --- Voice Listener & Protection State ---
 function initVoiceListener() {
   voiceListener.startListening(
     (triggerData) => {
-      // Voice trigger word detected!
       triggerEmergencyAlert("VOICE_KEYWORD", triggerData.spoken_phrase);
     },
     (interimText) => {
@@ -94,6 +299,54 @@ function initVoiceListener() {
   );
 }
 
+function toggleVoiceProtectionState() {
+  const toggleBtn = document.getElementById('toggleVoiceBtn');
+  const dashBadge = document.getElementById('dashVoiceBadge');
+  const headerBadge = document.getElementById('headerProtectionStatus');
+  const dashHeaderBadge = document.getElementById('dashProtectionBadge');
+
+  if (voiceListener.isListening) {
+    voiceListener.stopListening();
+    if (toggleBtn) {
+      toggleBtn.textContent = "Enable Voice Protection";
+      toggleBtn.className = "rf-btn rf-btn-primary";
+    }
+    if (dashBadge) {
+      dashBadge.className = "rf-status-pill offline";
+      dashBadge.innerHTML = '<span>Paused</span>';
+    }
+    if (headerBadge) {
+      headerBadge.className = "rf-status-pill offline";
+      document.getElementById('headerStatusText').textContent = "Protection Paused";
+    }
+    if (dashHeaderBadge) {
+      dashHeaderBadge.className = "rf-status-pill offline";
+      dashHeaderBadge.innerHTML = '<span>Protection Paused</span>';
+    }
+  } else {
+    voiceListener.startListening(
+      (triggerData) => triggerEmergencyAlert("VOICE_KEYWORD", triggerData.spoken_phrase),
+      null
+    );
+    if (toggleBtn) {
+      toggleBtn.textContent = "Disable Voice Protection";
+      toggleBtn.className = "rf-btn rf-btn-danger";
+    }
+    if (dashBadge) {
+      dashBadge.className = "rf-status-pill";
+      dashBadge.innerHTML = '<div class="rf-dot-active"></div><span>Listening...</span>';
+    }
+    if (headerBadge) {
+      headerBadge.className = "rf-status-pill";
+      document.getElementById('headerStatusText').textContent = "Protection Active";
+    }
+    if (dashHeaderBadge) {
+      dashHeaderBadge.className = "rf-status-pill";
+      dashHeaderBadge.innerHTML = '<div class="rf-dot-active"></div><span>Protection Active</span>';
+    }
+  }
+}
+
 // --- Trigger Emergency Alert Flow ---
 function triggerEmergencyAlert(triggerType = "MANUAL_BUTTON", phrase = "") {
   countdownSeconds = 5;
@@ -103,7 +356,7 @@ function triggerEmergencyAlert(triggerType = "MANUAL_BUTTON", phrase = "") {
 
   modal.classList.add('active');
   counterEl.textContent = countdownSeconds;
-  if (phraseEl) phraseEl.textContent = phrase ? `Detected voice: "${phrase}"` : "Manual SOS button pressed";
+  if (phraseEl) phraseEl.textContent = phrase ? `Detected phrase: "${phrase}"` : "Manual SOS button pressed";
 
   playEmergencyBeep();
 
@@ -161,7 +414,7 @@ function renderActiveDispatchBanner(sosResponse) {
 
   const esc = sosResponse.escalation || {};
   if (detailsEl) {
-    detailsEl.textContent = `Event #${sosResponse.event_id} • Patient: ${esc.user_name || 'Patient'} • Phone: ${esc.user_phone || ''} • Trigger: ${sosResponse.trigger_type}`;
+    detailsEl.textContent = `Event #${sosResponse.event_id} • Patient: ${esc.user_name || currentUserProfile.full_name} • Phone: ${esc.user_phone || ''} • Trigger: ${sosResponse.trigger_type}`;
   }
 
   if (mapLinkEl && esc.location_link) {
@@ -170,12 +423,12 @@ function renderActiveDispatchBanner(sosResponse) {
 
   if (logListEl && esc.dispatch_log) {
     logListEl.innerHTML = esc.dispatch_log.map(d => `
-      <div style="padding: 10px 14px; background: rgba(10, 13, 20, 0.7); border-radius: 10px; border-left: 3px solid ${d.level === 1 ? 'var(--accent-red)' : 'var(--accent-cyan)'}; display: flex; justify-content: space-between; align-items: center;">
+      <div style="padding: 8px 12px; background: rgba(5, 8, 17, 0.7); border-radius: 8px; border-left: 3px solid ${d.level === 1 ? 'var(--rf-emergency-red)' : 'var(--rf-cyan-accent)'}; display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div style="font-size: 13px; font-weight: 600; color: #fff;">Level ${d.level}: ${d.target}</div>
-          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">${d.action || d.note || ''}</div>
+          <div style="font-size: 12px; font-weight: 600; color: #fff;">Level ${d.level}: ${d.target}</div>
+          <div style="font-size: 11px; color: var(--rf-text-secondary); margin-top: 2px;">${d.action || d.note || ''}</div>
         </div>
-        <span class="badge ${d.status.includes('DELIVERED') ? 'badge-danger' : 'badge-primary'}">${d.status}</span>
+        <span class="rf-status-pill" style="font-size: 10px; padding: 2px 8px;">${d.status}</span>
       </div>
     `).join('');
   }
@@ -213,19 +466,47 @@ async function handleAcknowledgeCurrentSOS() {
   }
 }
 
-// --- Profile & Data Loading ---
+// --- Data Loading & Rendering ---
 async function loadProfile() {
   const user = await EmergencyAPI.getProfile(currentUserId);
   if (user) {
-    document.getElementById('profileName').textContent = user.full_name;
-    document.getElementById('profileBlood').textContent = user.blood_group || "O+";
-    document.getElementById('profileAllergies').textContent = user.allergies || "None";
-    document.getElementById('profileConditions').textContent = user.chronic_conditions || "None";
-    document.getElementById('profileMedicines').textContent = user.medicines || "None";
-    document.getElementById('profileHospital').textContent = user.preferred_hospital || "St. Mary's General";
-    document.getElementById('triggerWordInput').value = user.trigger_word || "HELP EMERGENCY";
+    currentUserProfile = { ...currentUserProfile, ...user };
+    
+    // Greeting
+    const greetingEl = document.getElementById('dashGreeting');
+    if (greetingEl) {
+      const hour = new Date().getHours();
+      const timeSalutation = hour < 12 ? 'Good Morning' : (hour < 18 ? 'Good Afternoon' : 'Good Evening');
+      const firstName = (user.full_name || 'Eleanor').split(' ')[0];
+      greetingEl.textContent = `${timeSalutation}, ${firstName}`;
+    }
 
-    voiceListener.setTargetTrigger(user.trigger_word || "HELP EMERGENCY");
+    const elements = {
+      'profileName': user.full_name,
+      'profileBlood': user.blood_group || "O+",
+      'dashBloodGroup': user.blood_group || "O+",
+      'profileAllergies': user.allergies || "None",
+      'dashAllergies': user.allergies || "None",
+      'profileConditions': user.chronic_conditions || "None",
+      'profileMedicines': user.medicines || "None",
+      'profileHospital': user.preferred_hospital || "St. Mary's General Hospital"
+    };
+
+    for (const [id, val] of Object.entries(elements)) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    }
+
+    const triggerInput = document.getElementById('triggerWordInput');
+    if (triggerInput) triggerInput.value = user.trigger_word || "HELP";
+
+    const triggerDisplay = document.getElementById('dashTriggerWordStr');
+    if (triggerDisplay) triggerDisplay.textContent = `"${user.trigger_word || 'HELP'}"`;
+
+    const voiceTriggerDetailDisplay = document.getElementById('voiceTriggerDisplayStr');
+    if (voiceTriggerDetailDisplay) voiceTriggerDetailDisplay.textContent = `"${user.trigger_word || 'HELP'}"`;
+
+    voiceListener.setTargetTrigger(user.trigger_word || "HELP");
   }
 }
 
@@ -235,31 +516,51 @@ async function updateTriggerWord() {
 
   await EmergencyAPI.updateProfile(currentUserId, { trigger_word: newTrigger });
   voiceListener.setTargetTrigger(newTrigger);
+  loadProfile();
   alert(`Trigger word updated to: "${newTrigger.toUpperCase()}"`);
 }
 
 async function loadContacts() {
   const contacts = await EmergencyAPI.getContacts(currentUserId);
   const container = document.getElementById('contactsListContainer');
+  const dashAvatarContainer = document.getElementById('dashContactsAvatars');
+  const dashCountStr = document.getElementById('dashContactCountStr');
+
+  if (dashCountStr) dashCountStr.textContent = `${contacts.length} Contacts Ready`;
+
+  if (dashAvatarContainer) {
+    dashAvatarContainer.innerHTML = contacts.map(c => `
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--rf-blue-primary), var(--rf-cyan-accent)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; border: 2px solid var(--rf-navy-surface);" title="${c.name} (${c.relationship})">
+        ${c.name[0]}
+      </div>
+    `).join('');
+  }
+
   if (!container) return;
 
   if (contacts.length === 0) {
-    container.innerHTML = '<p style="color: var(--text-secondary);">No emergency contacts configured yet.</p>';
+    container.innerHTML = '<p style="color: var(--rf-text-secondary); font-size: 13px;">No emergency contacts configured yet.</p>';
     return;
   }
 
   container.innerHTML = contacts.map(c => `
-    <div class="contact-item">
-      <div>
-        <h4 style="font-size: 16px; font-weight: 600;">${c.name}</h4>
-        <p style="font-size: 13px; color: var(--text-secondary);">${c.relationship} • ${c.phone_number}</p>
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <span class="badge ${c.priority_order === 1 ? 'badge-danger' : 'badge-primary'}">
-          Priority ${c.priority_order}
-        </span>
-        <span class="badge badge-primary">${c.notification_method}</span>
-        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="handleDeleteContact(${c.contact_id})">🗑️ Delete</button>
+    <div class="rf-card" style="margin-bottom: 0;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--rf-blue-primary), var(--rf-cyan-accent)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: #fff;">
+            ${c.name[0]}
+          </div>
+          <div>
+            <h4 style="font-size: 15px; font-weight: 700;">${c.name}</h4>
+            <div style="font-size: 12px; color: var(--rf-text-secondary);">${c.relationship} • ${c.phone_number}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a href="tel:${c.phone_number}" class="rf-icon-btn" style="width: 34px; height: 34px; text-decoration: none;" title="Call ${c.name}">📞</a>
+          <a href="sms:${c.phone_number}" class="rf-icon-btn" style="width: 34px; height: 34px; text-decoration: none;" title="Message ${c.name}">💬</a>
+          <button class="rf-icon-btn" style="width: 34px; height: 34px; color: var(--rf-emergency-red);" onclick="handleDeleteContact(${c.contact_id})" title="Delete Contact">🗑️</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -295,22 +596,73 @@ async function handleAddContact(event) {
 async function loadHistory() {
   const history = await EmergencyAPI.getSOSHistory(currentUserId);
   const container = document.getElementById('sosHistoryContainer');
+  const dashList = document.getElementById('dashRecentActivityList');
+
+  if (dashList) {
+    if (history.length === 0) {
+      dashList.innerHTML = '<p style="color: var(--rf-text-secondary); font-size: 12px;">No recent activity.</p>';
+    } else {
+      dashList.innerHTML = history.slice(0, 3).map(ev => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(5, 8, 17, 0.5); border-radius: 8px;">
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #fff;">${ev.trigger_type}</div>
+            <div style="font-size: 10px; color: var(--rf-text-secondary);">${new Date(ev.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+          </div>
+          <span class="rf-status-pill" style="font-size: 10px; padding: 2px 8px; background: rgba(239,68,68,0.15); color: var(--rf-emergency-red);">${ev.response_status}</span>
+        </div>
+      `).join('');
+    }
+  }
+
   if (!container) return;
 
   if (history.length === 0) {
-    container.innerHTML = '<p style="color: var(--text-secondary);">No previous SOS events recorded.</p>';
+    container.innerHTML = '<p style="color: var(--rf-text-secondary); font-size: 13px;">No previous SOS events recorded.</p>';
     return;
   }
 
   container.innerHTML = history.map(ev => `
-    <div class="contact-item" style="border-left: 4px solid var(--accent-red);">
+    <div style="padding: 14px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm); border-left: 4px solid var(--rf-emergency-red); display: flex; justify-content: space-between; align-items: center;">
       <div>
-        <h4 style="font-size: 15px; font-weight: 600;">SOS Event #${ev.event_id} (${ev.trigger_type})</h4>
-        <p style="font-size: 12px; color: var(--text-secondary);">${new Date(ev.timestamp).toLocaleString()} • ${ev.notes || ''}</p>
+        <h4 style="font-size: 14px; font-weight: 700;">SOS Event #${ev.event_id} (${ev.trigger_type})</h4>
+        <div style="font-size: 12px; color: var(--rf-text-secondary); margin-top: 2px;">${new Date(ev.timestamp).toLocaleString()} • ${ev.notes || ''}</div>
       </div>
-      <span class="badge badge-danger">${ev.response_status}</span>
+      <span class="rf-status-pill" style="background: rgba(239,68,68,0.15); color: var(--rf-emergency-red);">${ev.response_status}</span>
     </div>
   `).join('');
+}
+
+// --- Edit Medical Profile Modal ---
+function openEditProfileModal() {
+  document.getElementById('editName').value = currentUserProfile.full_name || '';
+  document.getElementById('editBlood').value = currentUserProfile.blood_group || 'O+';
+  document.getElementById('editAllergies').value = currentUserProfile.allergies || 'None';
+  document.getElementById('editMedicines').value = currentUserProfile.medicines || 'None';
+  document.getElementById('editConditions').value = currentUserProfile.chronic_conditions || 'None';
+  document.getElementById('editHospital').value = currentUserProfile.preferred_hospital || 'St. Mary\'s General Hospital';
+
+  document.getElementById('editProfileModal').classList.add('active');
+}
+
+function closeEditProfileModal() {
+  document.getElementById('editProfileModal').classList.remove('active');
+}
+
+async function handleSaveProfileEdit(event) {
+  event.preventDefault();
+  const updateData = {
+    full_name: document.getElementById('editName').value,
+    blood_group: document.getElementById('editBlood').value,
+    allergies: document.getElementById('editAllergies').value,
+    medicines: document.getElementById('editMedicines').value,
+    chronic_conditions: document.getElementById('editConditions').value,
+    preferred_hospital: document.getElementById('editHospital').value
+  };
+
+  await EmergencyAPI.updateProfile(currentUserId, updateData);
+  closeEditProfileModal();
+  loadProfile();
+  alert("Medical Profile updated successfully.");
 }
 
 async function downloadMedicalSummary() {
@@ -318,24 +670,10 @@ async function downloadMedicalSummary() {
   const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", jsonStr);
-  downloadAnchor.setAttribute("download", `Emergency_Medical_Card_${currentUserId}.json`);
+  downloadAnchor.setAttribute("download", `RakshaFlow_Medical_Card_${currentUserId}.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
-}
-
-function showNotificationModal(title, message) {
-  alert(`${title}\n\n${message}`);
-}
-
-function animateWaveform() {
-  const bars = document.querySelectorAll('.bar');
-  setInterval(() => {
-    bars.forEach(b => {
-      const h = Math.floor(Math.random() * 20) + 4;
-      b.style.height = `${h}px`;
-    });
-  }, 200);
 }
 
 // --- Healthcare AI Chatbot Controllers ---
@@ -350,17 +688,17 @@ async function handleHealthChatSubmit(event) {
 
   try {
     const response = await EmergencyAPI.sendHealthChatMessage(message, currentUserId);
-    appendChatMessage('HEALTHCARE AI BOT', response.reply, response.should_trigger_sos);
+    appendChatMessage('HEALTHCARE AI', response.reply, response.should_trigger_sos);
 
     if (response.should_trigger_sos) {
       setTimeout(() => {
-        if (confirm("🚨 CRITICAL WARNING: AI detected emergency symptoms. Trigger VoiceCare SOS alert now?")) {
+        if (confirm("🚨 CRITICAL WARNING: AI detected emergency symptoms. Trigger Raksha Flow SOS alert now?")) {
           triggerEmergencyAlert("VOICE_KEYWORD", message);
         }
       }, 500);
     }
   } catch (e) {
-    appendChatMessage('HEALTHCARE AI BOT', "Notice: Unable to reach online AI service. Please tap the red SOS button directly if you are experiencing an emergency.", true);
+    appendChatMessage('HEALTHCARE AI', "Notice: Unable to reach online AI service. Please tap the red SOS button directly if you are experiencing an emergency.", true);
   }
 }
 
@@ -376,29 +714,26 @@ function appendChatMessage(sender, text, isCritical) {
   const msgDiv = document.createElement('div');
   const isUser = sender === 'USER';
 
-  msgDiv.style.padding = '12px 16px';
-  msgDiv.style.borderRadius = '14px';
+  msgDiv.style.padding = '10px 14px';
+  msgDiv.style.borderRadius = '12px';
   msgDiv.style.maxWidth = '85%';
   msgDiv.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
 
   if (isUser) {
-    msgDiv.style.background = 'linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(2, 132, 199, 0.2))';
+    msgDiv.style.background = 'linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(6, 182, 212, 0.2))';
     msgDiv.style.border = '1px solid rgba(6, 182, 212, 0.4)';
-    msgDiv.style.borderBottomRightRadius = '4px';
   } else if (isCritical) {
     msgDiv.style.background = 'rgba(50, 12, 25, 0.9)';
-    msgDiv.style.border = '2px solid var(--accent-red)';
-    msgDiv.style.borderBottomLeftRadius = '4px';
-    msgDiv.style.boxShadow = '0 0 15px rgba(255, 51, 102, 0.4)';
+    msgDiv.style.border = '2px solid var(--rf-emergency-red)';
+    msgDiv.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.4)';
   } else {
-    msgDiv.style.background = 'rgba(26, 35, 54, 0.7)';
-    msgDiv.style.border = '1px solid var(--border-glass)';
-    msgDiv.style.borderBottomLeftRadius = '4px';
+    msgDiv.style.background = 'rgba(15, 23, 42, 0.8)';
+    msgDiv.style.border = '1px solid var(--rf-navy-card-border)';
   }
 
   msgDiv.innerHTML = `
-    <div style="font-size: 11px; font-weight: 700; color: ${isUser ? 'var(--accent-cyan)' : (isCritical ? 'var(--accent-red)' : 'var(--accent-cyan)')}; mb: 4px;">${sender}</div>
-    <div style="font-size: 13px; color: #ffffff; line-height: 1.5;">${text}</div>
+    <div style="font-size: 10px; font-weight: 700; color: ${isUser ? 'var(--rf-cyan-accent)' : (isCritical ? 'var(--rf-emergency-red)' : 'var(--rf-cyan-accent)')}; margin-bottom: 2px;">${sender}</div>
+    <div style="font-size: 13px; color: #ffffff; line-height: 1.4;">${text}</div>
   `;
 
   container.appendChild(msgDiv);
@@ -422,4 +757,18 @@ function handleVoiceChatInput() {
     handleHealthChatSubmit(null);
   };
   recog.start();
+}
+
+function showNotificationModal(title, message) {
+  alert(`${title}\n\n${message}`);
+}
+
+function animateWaveform() {
+  const bars = document.querySelectorAll('.bar');
+  setInterval(() => {
+    bars.forEach(b => {
+      const h = Math.floor(Math.random() * 20) + 4;
+      b.style.height = `${h}px`;
+    });
+  }, 200);
 }

@@ -2,331 +2,732 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emergency Voice Care System | Hands-Free SOS Assistance</title>
-  <meta name="description" content="Voice-activated emergency medical alert system providing continuous trigger word recognition, live GPS sharing, and automated caregiver escalation.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RAKSHA FLOW | AI-Powered Emergency Response</title>
+  <meta name="description" content="Raksha Flow is an AI-powered emergency-response platform providing hands-free voice trigger protection, live GPS sharing, and caregiver escalation.">
   <link rel="stylesheet" href="static/css/style.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <div class="app-container">
+  <div class="rf-app-wrapper">
     
-    <!-- Navbar -->
-    <header class="navbar">
-      <div class="brand">
-        <div class="brand-icon">🚨</div>
-        <div>
-          <div class="brand-title">VoiceCare SOS</div>
-          <div class="brand-subtitle">Emergency Assistance System</div>
-        </div>
+    <!-- Top Header Navigation -->
+    <header id="appHeader" class="rf-header" style="display: none;">
+      <div class="rf-brand-group" onclick="navigateTo('dashboard')">
+        <svg class="rf-logo-img" viewBox="0 0 300 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 10 L70 20 V45 C70 65 40 75 40 75 C40 75 10 65 10 45 V20 Z" stroke="url(#rf-grad)" stroke-width="4" fill="none"/>
+          <path d="M22 42 C30 35, 38 48, 50 38" stroke="url(#rf-grad)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M48 34 L58 38 L48 44" fill="none" stroke="url(#rf-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="85" y="48" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="28" letter-spacing="1">RAKSHA FLOW</text>
+          <defs>
+            <linearGradient id="rf-grad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#06b6d4"/>
+              <stop offset="1" stop-color="#2563eb"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
 
-      <div style="display: flex; gap: 16px; align-items: center;">
-        <div class="system-status-pill">
-          <div class="pulse-dot"></div>
-          <span id="headerSystemStatus">System Online • GPS Active • 92% Battery</span>
+      <div class="rf-header-actions">
+        <div id="headerProtectionStatus" class="rf-status-pill">
+          <div class="rf-dot-active"></div>
+          <span id="headerStatusText">Protection Active</span>
+        </div>
+
+        <button class="rf-icon-btn" onclick="navigateTo('history')" title="Notifications & Event Log">
+          🔔
+        </button>
+
+        <div class="rf-avatar" onclick="navigateTo('medical-id')" id="userHeaderAvatar">
+          EV
         </div>
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs">
-      <button class="tab-btn active" data-target="tab-sos">
-        <span>🚨</span> SOS Dashboard
-      </button>
-      <button class="tab-btn" data-target="tab-chatbot">
-        <span>💬</span> Healthcare AI Chatbot
-      </button>
-      <button class="tab-btn" data-target="tab-voice">
-        <span>🎙️</span> Voice Trigger
-      </button>
-      <button class="tab-btn" data-target="tab-contacts">
-        <span>📞</span> Emergency Contacts
-      </button>
-      <button class="tab-btn" data-target="tab-profile">
-        <span>📋</span> Medical ID Profile
-      </button>
-      <button class="tab-btn" data-target="tab-history">
-        <span>📜</span> Event History
-      </button>
-    </nav>
+    <!-- Main Content Router Body -->
+    <main class="rf-content-body">
 
-    <!-- TAB 1: SOS DASHBOARD -->
-    <section id="tab-sos" class="tab-content" style="display: block;">
-      
-      <!-- Active Dispatch Banner (Renders dynamically when SOS is triggered) -->
-      <div id="activeDispatchCard" class="glass-card" style="display: none; border-color: var(--accent-red); background: rgba(35, 12, 22, 0.7); margin-bottom: 24px;">
-        <div class="card-title" style="color: var(--accent-red);">
-          <span>🚨 ACTIVE EMERGENCY ALERT DISPATCHED</span>
-          <span id="dispatchStatusBadge" class="badge badge-danger">PRIMARY CONTACTS ALERTED</span>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 10px;">
-          <div style="padding: 12px; background: rgba(10, 13, 20, 0.6); border-radius: 12px; border: 1px solid rgba(255, 51, 102, 0.3);">
-            <div style="font-size: 11px; color: var(--text-secondary);">EVENT DETAILS</div>
-            <div id="dispatchDetails" style="font-size: 14px; font-weight: 600; color: #fff; margin-top: 4px;">-</div>
-          </div>
-
-          <div style="padding: 12px; background: rgba(10, 13, 20, 0.6); border-radius: 12px; border: 1px solid rgba(6, 182, 212, 0.3);">
-            <div style="font-size: 11px; color: var(--text-secondary);">SHARED LIVE GPS MAP LINK</div>
-            <div style="margin-top: 4px;">
-              <a id="dispatchMapLink" href="#" target="_blank" style="color: var(--accent-cyan); font-weight: 600; font-size: 13px; text-decoration: underline;">
-                🔗 Open Shared Google Maps Location
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top: 14px;">
-          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">CONTACT DISPATCH LOG & DELIVERY STATUS</div>
-          <div id="dispatchLogList" style="display: flex; flex-direction: column; gap: 8px;">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; pt: 12px; border-top: 1px solid var(--border-glass);">
-          <span style="font-size: 12px; color: var(--text-secondary);">Level 2 Backup Escalation in <strong id="escalationCountdown" style="color: var(--accent-amber);">120s</strong> if unacknowledged</span>
-          <button class="btn btn-primary" style="padding: 8px 18px; font-size: 13px;" onclick="handleAcknowledgeCurrentSOS()">✅ Acknowledge & Resolve SOS</button>
-        </div>
-      </div>
-
-      <div class="main-grid">
-        
-        <!-- Left: Big SOS Button -->
-        <div class="glass-card sos-container">
-          <button class="sos-button" onclick="triggerEmergencyAlert('MANUAL_BUTTON')">
-            <span class="sos-text">SOS</span>
-            <span class="sos-subtext">TAP OR SAY "HELP"</span>
-          </button>
-
-          <!-- Voice Listener Bar -->
-          <div class="voice-bar">
-            <div id="micBadge" class="mic-badge listening">🎙️</div>
-            <div style="flex: 1;">
-              <div id="micStatusLabel" style="font-weight: 600; font-size: 14px;">Listening for trigger word...</div>
-              <div id="liveSpeechTranscript" style="font-size: 12px; color: var(--text-secondary);">Say "HELP EMERGENCY" anytime hands-free</div>
-            </div>
-            <div class="audio-waveform">
-              <div class="bar active"></div>
-              <div class="bar active"></div>
-              <div class="bar active"></div>
-              <div class="bar active"></div>
-              <div class="bar active"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Active Status & Quick Info -->
-        <div style="display: flex; flex-direction: column; gap: 24px;">
+      <!-- ========================================== -->
+      <!-- VIEW 1: AUTH LOGIN (/login)               -->
+      <!-- ========================================== -->
+      <section id="view-login" class="rf-view active">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
           
-          <div class="glass-card">
-            <div class="card-title">
-              <span>📍 Real-Time Live GPS Fix</span>
-              <span id="liveAccuracyTag" class="badge badge-primary">Acquiring GPS...</span>
+          <!-- Logo & Brand Header -->
+          <div style="margin-bottom: 20px;">
+            <svg viewBox="0 0 300 80" style="width: 240px; height: 64px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M40 10 L70 20 V45 C70 65 40 75 40 75 C40 75 10 65 10 45 V20 Z" stroke="url(#rf-grad-login)" stroke-width="4" fill="none"/>
+              <path d="M22 42 C30 35, 38 48, 50 38" stroke="url(#rf-grad-login)" stroke-width="4" stroke-linecap="round"/>
+              <path d="M48 34 L58 38 L48 44" fill="none" stroke="url(#rf-grad-login)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="85" y="48" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="28" letter-spacing="1">RAKSHA FLOW</text>
+              <defs>
+                <linearGradient id="rf-grad-login" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#06b6d4"/>
+                  <stop offset="1" stop-color="#2563eb"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div style="font-size: 13px; color: var(--rf-text-secondary); margin-top: 4px; font-weight: 500;">Your Safety. Our Priority.</div>
+          </div>
+
+          <!-- Animated ECG Waveform -->
+          <div class="rf-ecg-container" style="max-width: 360px;">
+            <canvas id="loginEcgCanvas" class="rf-ecg-canvas"></canvas>
+          </div>
+
+          <!-- Login Form Card -->
+          <div class="rf-card" style="width: 100%; max-width: 380px; margin-top: 10px;">
+            <h2 style="font-family: var(--rf-font-display); font-size: 22px; font-weight: 700; margin-bottom: 4px;">Welcome Back</h2>
+            <p style="font-size: 13px; color: var(--rf-text-secondary); margin-bottom: 20px;">Sign in to continue</p>
+
+            <form id="loginForm" onsubmit="handleAuthLogin(event)">
+              <div class="rf-form-group">
+                <label class="rf-label">Email or Username</label>
+                <div class="rf-input-wrapper">
+                  <input type="email" id="loginEmail" class="rf-input" value="demo@carevoice.app" placeholder="name@example.com" required>
+                </div>
+              </div>
+
+              <div class="rf-form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label class="rf-label">Password</label>
+                  <a href="#" style="font-size: 11px; color: var(--rf-cyan-accent); text-decoration: none;" onclick="alert('Password reset link has been dispatched to your registered email.')">Forgot Password?</a>
+                </div>
+                <div class="rf-input-wrapper">
+                  <input type="password" id="loginPassword" class="rf-input" value="demo123" placeholder="••••••••" required>
+                  <button type="button" class="rf-input-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)">👁️</button>
+                </div>
+              </div>
+
+              <button type="submit" class="rf-btn rf-btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
+            </form>
+
+            <div style="display: flex; align-items: center; gap: 12px; margin: 18px 0;">
+              <div style="flex: 1; height: 1px; background: var(--rf-navy-card-border);"></div>
+              <span style="font-size: 11px; color: var(--rf-text-muted); font-weight: 600;">OR</span>
+              <div style="flex: 1; height: 1px; background: var(--rf-navy-card-border);"></div>
             </div>
-            <p style="font-size: 13px; color: var(--text-secondary);">
-              Live location coordinates are captured and automatically attached to all emergency dispatches.
-            </p>
-            
-            <div style="padding: 16px; background: rgba(10, 13, 20, 0.6); border-radius: 14px; border: 1px solid var(--border-glass); display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; justify-content: space-between; font-size: 13px; font-family: monospace;">
-                <span>LATITUDE: <strong id="liveLat" style="color: var(--accent-cyan);">12.9716 N</strong></span>
-                <span>LONGITUDE: <strong id="liveLng" style="color: var(--accent-cyan);">77.5946 E</strong></span>
+
+            <!-- Google Authentication Button -->
+            <button type="button" class="rf-btn rf-btn-google" style="width: 100%;" onclick="handleGoogleAuth()">
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            <div style="margin-top: 18px; font-size: 13px; color: var(--rf-text-secondary);">
+              Don't have an account? <a href="#" style="color: var(--rf-cyan-accent); font-weight: 600; text-decoration: none;" onclick="navigateTo('signup')">Sign Up</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: AUTH SIGNUP (/signup)             -->
+      <!-- ========================================== -->
+      <section id="view-signup" class="rf-view">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px 10px;">
+          
+          <div style="margin-bottom: 16px;">
+            <svg viewBox="0 0 300 80" style="width: 220px; height: 58px;" fill="none">
+              <path d="M40 10 L70 20 V45 C70 65 40 75 40 75 C40 75 10 65 10 45 V20 Z" stroke="url(#rf-grad-signup)" stroke-width="4" fill="none"/>
+              <path d="M22 42 C30 35, 38 48, 50 38" stroke="url(#rf-grad-signup)" stroke-width="4" stroke-linecap="round"/>
+              <path d="M48 34 L58 38 L48 44" fill="none" stroke="url(#rf-grad-signup)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="85" y="48" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="28" letter-spacing="1">RAKSHA FLOW</text>
+              <defs>
+                <linearGradient id="rf-grad-signup" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#06b6d4"/>
+                  <stop offset="1" stop-color="#2563eb"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="rf-card" style="width: 100%; max-width: 380px;">
+            <h2 style="font-family: var(--rf-font-display); font-size: 22px; font-weight: 700; margin-bottom: 4px;">Create Account</h2>
+            <p style="font-size: 13px; color: var(--rf-text-secondary); margin-bottom: 18px;">Create your account to get started</p>
+
+            <form id="signupForm" onsubmit="handleAuthSignup(event)">
+              <div class="rf-form-group">
+                <label class="rf-label">Full Name</label>
+                <input type="text" id="signupName" class="rf-input" placeholder="Eleanor Vance" required>
               </div>
-              <div style="font-size: 12px; color: var(--text-primary);">
-                📍 ADDRESS: <span id="liveAddress" style="font-weight: 600;">Fetching live address fix...</span>
+
+              <div class="rf-form-group">
+                <label class="rf-label">Email Address</label>
+                <input type="email" id="signupEmail" class="rf-input" placeholder="name@example.com" required>
               </div>
+
+              <div class="rf-form-group">
+                <label class="rf-label">Password</label>
+                <div class="rf-input-wrapper">
+                  <input type="password" id="signupPassword" class="rf-input" placeholder="••••••••" required>
+                  <button type="button" class="rf-input-toggle-btn" onclick="togglePasswordVisibility('signupPassword', this)">👁️</button>
+                </div>
+              </div>
+
+              <div class="rf-form-group">
+                <label class="rf-label">Confirm Password</label>
+                <div class="rf-input-wrapper">
+                  <input type="password" id="signupConfirmPassword" class="rf-input" placeholder="••••••••" required>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px; margin: 12px 0; text-align: left;">
+                <input type="checkbox" id="termsCheck" required style="accent-color: var(--rf-cyan-accent);">
+                <label for="termsCheck" style="font-size: 12px; color: var(--rf-text-secondary);">I agree to the <a href="#" style="color: var(--rf-cyan-accent);">Terms & Conditions</a></label>
+              </div>
+
+              <button type="submit" class="rf-btn rf-btn-primary" style="width: 100%;">Create Account</button>
+            </form>
+
+            <div style="display: flex; align-items: center; gap: 12px; margin: 16px 0;">
+              <div style="flex: 1; height: 1px; background: var(--rf-navy-card-border);"></div>
+              <span style="font-size: 11px; color: var(--rf-text-muted); font-weight: 600;">OR</span>
+              <div style="flex: 1; height: 1px; background: var(--rf-navy-card-border);"></div>
+            </div>
+
+            <button type="button" class="rf-btn rf-btn-google" style="width: 100%;" onclick="handleGoogleAuth()">
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            <div style="margin-top: 16px; font-size: 13px; color: var(--rf-text-secondary);">
+              Already have an account? <a href="#" style="color: var(--rf-cyan-accent); font-weight: 600; text-decoration: none;" onclick="navigateTo('login')">Sign In</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 3: MAIN DASHBOARD (/dashboard)        -->
+      <!-- ========================================== -->
+      <section id="view-dashboard" class="rf-view">
+        
+        <!-- User Welcome Banner -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 id="dashGreeting" style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700; color: #fff;">Good Evening, Eleanor</h2>
+            <div style="font-size: 12px; color: var(--rf-text-secondary);">Protection active & monitoring</div>
+          </div>
+          <span class="rf-status-pill" id="dashProtectionBadge">
+            <div class="rf-dot-active"></div>
+            <span>Protection Active</span>
+          </span>
+        </div>
+
+        <!-- Active Dispatch Banner (Renders dynamically when SOS is triggered) -->
+        <div id="activeDispatchCard" class="rf-card" style="display: none; border-color: var(--rf-emergency-red); background: rgba(35, 12, 22, 0.85); margin-bottom: 20px;">
+          <div class="rf-card-header">
+            <span class="rf-card-title" style="color: var(--rf-emergency-red);">🚨 ACTIVE EMERGENCY ALERT DISPATCHED</span>
+            <span id="dispatchStatusBadge" class="rf-status-pill" style="background: rgba(239, 68, 68, 0.2); color: var(--rf-emergency-red); border-color: var(--rf-emergency-red);">PRIMARY CONTACTS ALERTED</span>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 10px;">
+            <div style="padding: 12px; background: rgba(5, 8, 17, 0.7); border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.3);">
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">EVENT DETAILS</div>
+              <div id="dispatchDetails" style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 4px;">-</div>
+            </div>
+
+            <div style="padding: 12px; background: rgba(5, 8, 17, 0.7); border-radius: 10px; border: 1px solid var(--rf-cyan-glow);">
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">SHARED LIVE GPS MAP LINK</div>
               <div style="margin-top: 4px;">
-                <a id="liveMapLinkAnchor" href="#" target="_blank" style="font-size: 12px; color: var(--accent-cyan); font-weight: 600; text-decoration: underline;">
-                  🗺️ View Live Map Coordinates
+                <a id="dispatchMapLink" href="#" target="_blank" style="color: var(--rf-cyan-accent); font-weight: 600; font-size: 12px; text-decoration: underline;">
+                  🔗 Open Shared Google Maps Location
                 </a>
               </div>
             </div>
           </div>
 
-          <div class="glass-card">
-            <div class="card-title">
-              <span>🛡️ Caregiver Escalation Chain</span>
-              <span class="badge badge-danger">Multi-Tier Enabled</span>
+          <div style="margin-top: 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--rf-text-secondary); margin-bottom: 6px;">CONTACT DISPATCH LOG & DELIVERY STATUS</div>
+            <div id="dispatchLogList" style="display: flex; flex-direction: column; gap: 6px;">
+              <!-- Rendered via JS -->
             </div>
-            <p style="font-size: 13px; color: var(--text-secondary);">
-              If Level 1 primary contact does not respond in 120s, system automatically escalates to fallback contacts and regional emergency ambulance services.
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; pt: 10px; border-top: 1px solid var(--rf-navy-card-border);">
+            <span style="font-size: 11px; color: var(--rf-text-secondary);">Level 2 Backup Escalation in <strong id="escalationCountdown" style="color: #f59e0b;">120s</strong></span>
+            <button class="rf-btn rf-btn-primary" style="padding: 6px 14px; font-size: 12px;" onclick="handleAcknowledgeCurrentSOS()">✅ Acknowledge & Resolve SOS</button>
+          </div>
+        </div>
+
+        <!-- Animated ECG Section -->
+        <div class="rf-ecg-container">
+          <canvas id="dashboardEcgCanvas" class="rf-ecg-canvas"></canvas>
+        </div>
+
+        <!-- Main SOS Control Section -->
+        <div class="rf-sos-wrapper">
+          <button class="rf-sos-button" onclick="triggerEmergencyAlert('MANUAL_BUTTON')">
+            <span class="rf-sos-text">SOS</span>
+            <span class="rf-sos-subtext">Hold to Activate</span>
+          </button>
+        </div>
+
+        <!-- Dashboard Feature Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+
+          <!-- Voice Protection Card -->
+          <div class="rf-card" onclick="navigateTo('voice-protection')" style="cursor: pointer;">
+            <div class="rf-card-header">
+              <span class="rf-card-title">🎙️ Voice Protection</span>
+              <span id="dashVoiceBadge" class="rf-status-pill">
+                <div class="rf-dot-active"></div>
+                <span>Listening...</span>
+              </span>
+            </div>
+            <p style="font-size: 13px; color: var(--rf-text-secondary); margin-bottom: 10px;">
+              Say <strong style="color: var(--rf-cyan-accent);" id="dashTriggerWordStr">"HELP"</strong> to activate emergency assistance.
             </p>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--rf-cyan-accent); font-weight: 600;">
+              <span>Continuous Ambient Keyword Detection</span>
+              <span>Configure →</span>
+            </div>
+          </div>
+
+          <!-- Live Location Card -->
+          <div class="rf-card">
+            <div class="rf-card-header">
+              <span class="rf-card-title">📍 Live Location</span>
+              <span id="liveAccuracyTag" class="rf-status-pill">GPS Active</span>
+            </div>
+            <div style="font-family: monospace; font-size: 13px; color: var(--rf-cyan-accent); margin-bottom: 6px;">
+              <span id="liveLat">12.9716° N</span>, <span id="liveLng">77.5946° E</span>
+            </div>
+            <p id="liveAddress" style="font-size: 12px; color: var(--rf-text-secondary); margin-bottom: 12px;">
+              Bengaluru, Karnataka, India
+            </p>
+            <div style="display: flex; gap: 10px;">
+              <button class="rf-btn rf-btn-primary" style="padding: 8px 14px; font-size: 12px; flex: 1;" onclick="navigateTo('live-location')">View on Map</button>
+              <button class="rf-btn" style="padding: 8px 14px; font-size: 12px; background: rgba(255,255,255,0.06); color: #fff;" onclick="shareCurrentLocation()">Share Location</button>
+            </div>
+          </div>
+
+          <!-- Emergency Contacts Card -->
+          <div class="rf-card">
+            <div class="rf-card-header">
+              <span class="rf-card-title">📞 Emergency Contacts</span>
+              <span class="rf-card-action" onclick="navigateTo('contacts')">View All</span>
+            </div>
+            <div id="dashContactsAvatars" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <!-- Rendered via JS -->
+            </div>
+            <div style="font-size: 12px; color: var(--rf-text-secondary);" id="dashContactCountStr">3 Contacts Ready</div>
+          </div>
+
+          <!-- Medical ID Card -->
+          <div class="rf-card">
+            <div class="rf-card-header">
+              <span class="rf-card-title">📋 Medical ID</span>
+              <span class="rf-card-action" onclick="navigateTo('medical-id')">View Details</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
+              <div>
+                <div style="font-size: 11px; color: var(--rf-text-secondary);">BLOOD GROUP</div>
+                <div id="dashBloodGroup" style="font-size: 20px; font-weight: 800; color: var(--rf-blue-primary);">O+</div>
+              </div>
+              <div>
+                <div style="font-size: 11px; color: var(--rf-text-secondary);">ALLERGIES</div>
+                <div id="dashAllergies" style="font-size: 13px; font-weight: 600;">None</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Healthcare AI Assistant Card -->
+          <div class="rf-card" onclick="navigateTo('healthcare-ai')" style="cursor: pointer; border-color: rgba(6, 182, 212, 0.3);">
+            <div class="rf-card-header">
+              <span class="rf-card-title">💬 Healthcare AI Assistant</span>
+              <span class="rf-status-pill">Emergency Triage AI</span>
+            </div>
+            <p style="font-size: 12px; color: var(--rf-text-secondary); margin-bottom: 8px;">
+              Ask symptom questions, first-aid CPR steps, or emergency guidance.
+            </p>
+            <div style="font-size: 12px; color: var(--rf-cyan-accent); font-weight: 600;">Start Chat Assistant →</div>
+          </div>
+
+          <!-- Recent Activity Card -->
+          <div class="rf-card">
+            <div class="rf-card-header">
+              <span class="rf-card-title">📜 Recent Activity</span>
+              <span class="rf-card-action" onclick="navigateTo('history')">View All</span>
+            </div>
+            <div id="dashRecentActivityList" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Rendered via JS -->
+            </div>
           </div>
 
         </div>
 
-      </div>
-    </section>
+      </section>
 
-    <!-- TAB: HEALTHCARE AI CHATBOT -->
-    <section id="tab-chatbot" class="tab-content" style="display: none;">
-      <div class="glass-card">
-        <div class="card-title">
-          <span>💬 VoiceCare Healthcare AI Assistant</span>
-          <span class="badge badge-primary">24/7 Medical Triage AI</span>
-        </div>
-        <p style="color: var(--text-secondary); font-size: 13px;">
-          Ask symptom queries, first-aid steps, or emergency triage advice. If critical emergency symptoms are detected, the AI will offer to dispatch your SOS alert automatically.
-        </p>
-
-        <!-- Suggestion Chips -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
-          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('I am experiencing chest pain and left arm numbness')">🚨 Chest Pain Triage</button>
-          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('What are the first aid steps for CPR?')">🫀 CPR First Aid</button>
-          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('First aid for minor household burns')">🔥 Burn First Aid</button>
-          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="sendQuickChatMessage('How to manage a high fever at home?')">🌡️ High Fever Care</button>
+      <!-- ========================================== -->
+      <!-- VIEW 4: VOICE PROTECTION (/voice-protection)-->
+      <!-- ========================================== -->
+      <section id="view-voice" class="rf-view">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <button class="rf-icon-btn" onclick="navigateTo('dashboard')">←</button>
+          <h2 style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700;">Voice Protection</h2>
         </div>
 
-        <!-- Chat History Log -->
-        <div id="chatMessagesContainer" style="height: 340px; overflow-y: auto; background: rgba(10, 13, 20, 0.6); border: 1px solid var(--border-glass); border-radius: 16px; padding: 16px; margin-top: 14px; display: flex; flex-direction: column; gap: 12px;">
-          <div style="padding: 12px; background: rgba(26, 35, 54, 0.7); border-radius: 12px; max-width: 80%; border-left: 3px solid var(--accent-cyan);">
-            <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 700;">HEALTHCARE AI BOT</div>
-            <div style="font-size: 13px; color: #fff; margin-top: 4px;">Hello! I am your Healthcare AI Assistant. Ask me any first-aid question or symptom check. (For severe crises, tap SOS immediately).</div>
+        <div class="rf-card" style="text-align: center; padding: 30px 20px;">
+          <span id="voiceProtectionDetailBadge" class="rf-status-pill" style="margin-bottom: 20px;">
+            <div class="rf-dot-active"></div>
+            <span>Active Protection</span>
+          </span>
+
+          <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(37, 99, 235, 0.15)); border: 2px solid var(--rf-cyan-accent); display: flex; align-items: center; justify-content: center; font-size: 48px; margin: 0 auto 20px auto; box-shadow: 0 0 30px var(--rf-cyan-glow);">
+            🎙️
           </div>
-        </div>
 
-        <!-- Chat Input Form -->
-        <form id="chatForm" onsubmit="handleHealthChatSubmit(event)" style="display: flex; gap: 10px; margin-top: 14px;">
-          <input type="text" id="chatInput" class="form-input" placeholder="Type your symptom or health question here..." required style="flex: 1;">
-          <button type="button" class="btn btn-primary" style="padding: 12px;" onclick="handleVoiceChatInput()">🎙️ Voice Input</button>
-          <button type="submit" class="btn btn-primary">Send 💬</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- TAB 2: VOICE TRIGGER SETTINGS -->
-    <section id="tab-voice" class="tab-content" style="display: none;">
-      <div class="glass-card">
-        <div class="card-title">🎙️ Spoken Trigger Word Configuration</div>
-        <p style="color: var(--text-secondary); font-size: 14px;">
-          Customize the secret emergency phrase that your phone will listen for in ambient mode. Make sure it is distinct and easy for you to pronounce.
-        </p>
-
-        <div class="form-group" style="max-width: 500px; margin-top: 16px;">
-          <label class="form-label">Custom Trigger Phrase</label>
-          <input type="text" id="triggerWordInput" class="form-input" value="HELP EMERGENCY" placeholder="e.g. HELP EMERGENCY, SAVE ME NOW">
-        </div>
-
-        <div style="display: flex; gap: 12px;">
-          <button class="btn btn-primary" onclick="updateTriggerWord()">Save Trigger Phrase</button>
-          <button class="btn btn-danger" onclick="triggerEmergencyAlert('VOICE_KEYWORD', document.getElementById('triggerWordInput').value)">Test Voice Trigger</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 3: EMERGENCY CONTACTS -->
-    <section id="tab-contacts" class="tab-content" style="display: none;">
-      <div class="main-grid">
-        
-        <div class="glass-card">
-          <div class="card-title">📞 Configured Emergency Contacts</div>
-          <div id="contactsListContainer" style="display: flex; flex-direction: column; gap: 12px;">
-            <!-- Rendered via JS -->
+          <div class="rf-ecg-container" style="height: 50px; margin-bottom: 20px;">
+            <canvas id="voiceEcgCanvas" class="rf-ecg-canvas"></canvas>
           </div>
+
+          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Listening for trigger word</h3>
+          <div style="font-size: 22px; font-weight: 800; color: var(--rf-cyan-accent); margin-bottom: 16px;" id="voiceTriggerDisplayStr">"HELP"</div>
+
+          <div style="padding: 14px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm); border: 1px solid var(--rf-navy-card-border); font-size: 12px; color: var(--rf-text-secondary); margin-bottom: 24px;">
+            💡 <strong>Tip:</strong> You can say "HELP" anytime hands-free to activate immediate emergency assistance.
+          </div>
+
+          <div class="rf-form-group" style="text-align: left; max-width: 400px; margin: 0 auto 20px auto;">
+            <label class="rf-label">Customize Spoken Trigger Phrase</label>
+            <input type="text" id="triggerWordInput" class="rf-input" value="HELP EMERGENCY" placeholder="e.g. HELP EMERGENCY, SAVE ME">
+            <button class="rf-btn rf-btn-primary" style="margin-top: 8px;" onclick="updateTriggerWord()">Update Trigger Word</button>
+          </div>
+
+          <button id="toggleVoiceBtn" class="rf-btn rf-btn-danger" style="width: 100%; max-width: 320px;" onclick="toggleVoiceProtectionState()">
+            Disable Voice Protection
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 5: LIVE LOCATION (/live-location)     -->
+      <!-- ========================================== -->
+      <section id="view-location" class="rf-view">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <button class="rf-icon-btn" onclick="navigateTo('dashboard')">←</button>
+          <h2 style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700;">Live Location</h2>
         </div>
 
-        <div class="glass-card">
-          <div class="card-title">➕ Add New Contact</div>
+        <div class="rf-card">
+          <div class="rf-card-header">
+            <span class="rf-card-title">📍 High Precision GPS Tracking</span>
+            <span id="detailLocationAccuracyTag" class="rf-status-pill">GPS Active</span>
+          </div>
+
+          <!-- Interactive Map Preview Box -->
+          <div style="width: 100%; height: 220px; border-radius: var(--rf-radius-md); overflow: hidden; position: relative; margin-bottom: 16px; border: 1px solid var(--rf-navy-card-border); background: #0c1527;">
+            <iframe id="mapPreviewIframe" width="100%" height="100%" frameborder="0" style="border:0;" src="https://maps.google.com/maps?q=12.9716,77.5946&z=15&output=embed" allowfullscreen></iframe>
+          </div>
+
+          <div style="padding: 16px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm); border: 1px solid var(--rf-navy-card-border); display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+            <div style="font-size: 15px; font-weight: 700; color: #fff;">
+              <span id="detailLat">12.9716° N</span>, <span id="detailLng">77.5946° E</span>
+            </div>
+            <div id="detailAddress" style="font-size: 13px; color: var(--rf-text-secondary);">
+              Bengaluru, Karnataka, India
+            </div>
+            <div style="font-size: 11px; color: var(--rf-text-muted);">
+              ● Last Updated: <span id="detailLocationTimestamp">Just Now</span>
+            </div>
+          </div>
+
+          <button class="rf-btn rf-btn-primary" style="width: 100%;" onclick="shareCurrentLocation()">
+            🚀 Share Live Location URL
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 6: EMERGENCY CONTACTS (/contacts)     -->
+      <!-- ========================================== -->
+      <section id="view-contacts" class="rf-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="rf-icon-btn" onclick="navigateTo('dashboard')">←</button>
+            <h2 style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700;">Emergency Contacts</h2>
+          </div>
+          <button class="rf-icon-btn" onclick="openAddContactModal()" title="Add Contact">+</button>
+        </div>
+
+        <div id="contactsListContainer" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Add Contact Form Card -->
+        <div class="rf-card">
+          <div class="rf-card-title" style="margin-bottom: 14px;">➕ Add New Emergency Contact</div>
           <form id="contactForm" onsubmit="handleAddContact(event)">
-            <div class="form-group">
-              <label class="form-label">Full Name</label>
-              <input type="text" id="contactName" class="form-input" placeholder="e.g. Dr. Robert Vance" required>
+            <div class="rf-form-group">
+              <label class="rf-label">Full Name</label>
+              <input type="text" id="contactName" class="rf-input" placeholder="e.g. Dr. Robert Vance" required>
             </div>
-            <div class="form-group">
-              <label class="form-label">Relationship</label>
-              <input type="text" id="contactRel" class="form-input" placeholder="e.g. Son / Primary Caregiver" required>
+            <div class="rf-form-group">
+              <label class="rf-label">Relationship</label>
+              <input type="text" id="contactRel" class="rf-input" placeholder="e.g. Son / Primary Caregiver" required>
             </div>
-            <div class="form-group">
-              <label class="form-label">Phone Number</label>
-              <input type="text" id="contactPhone" class="form-input" placeholder="+1-555-019-9944" required>
+            <div class="rf-form-group">
+              <label class="rf-label">Phone Number</label>
+              <input type="text" id="contactPhone" class="rf-input" placeholder="+1-555-019-9944" required>
             </div>
-            <div class="form-group">
-              <label class="form-label">Escalation Priority</label>
-              <select id="contactPriority" class="form-input">
+            <div class="rf-form-group">
+              <label class="rf-label">Escalation Priority</label>
+              <select id="contactPriority" class="rf-input">
                 <option value="1">Priority 1 (Primary Recipient)</option>
                 <option value="2">Priority 2 (Secondary Escalation)</option>
               </select>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Contact</button>
+            <button type="submit" class="rf-btn rf-btn-primary" style="width: 100%;">Save Contact</button>
           </form>
         </div>
+      </section>
 
-      </div>
-    </section>
-
-    <!-- TAB 4: MEDICAL PROFILE ID -->
-    <section id="tab-profile" class="tab-content" style="display: none;">
-      <div class="glass-card">
-        <div class="card-title">
-          <span>📋 Patient Emergency Medical Card</span>
-          <button class="btn btn-primary" onclick="downloadMedicalSummary()">📥 Export Emergency Card (JSON)</button>
+      <!-- ========================================== -->
+      <!-- VIEW 7: MEDICAL ID (/medical-id)           -->
+      <!-- ========================================== -->
+      <section id="view-medical-id" class="rf-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="rf-icon-btn" onclick="navigateTo('dashboard')">←</button>
+            <h2 style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700;">Medical ID</h2>
+          </div>
+          <button class="rf-card-action" style="font-size: 14px;" onclick="openEditProfileModal()">Edit</button>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 16px;">
-          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 12px; color: var(--text-secondary);">PATIENT NAME</div>
-            <div id="profileName" style="font-size: 18px; font-weight: 700; color: #ffffff;">Eleanor Vance</div>
+        <div class="rf-card">
+          <div style="display: flex; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rf-navy-card-border); margin-bottom: 16px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--rf-emergency-red), #b91c1c); display: flex; align-items: center; justify-content: center; font-size: 28px;">
+              🩸
+            </div>
+            <div>
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">BLOOD GROUP</div>
+              <div id="profileBlood" style="font-family: var(--rf-font-display); font-size: 28px; font-weight: 800; color: #fff;">O+</div>
+            </div>
           </div>
 
-          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 12px; color: var(--text-secondary);">BLOOD GROUP</div>
-            <div id="profileBlood" style="font-size: 18px; font-weight: 700; color: var(--accent-red);">A+</div>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">PATIENT NAME</div>
+              <div id="profileName" style="font-size: 15px; font-weight: 700; color: #fff;">Eleanor Vance</div>
+            </div>
+
+            <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">KNOWN ALLERGIES</div>
+              <div id="profileAllergies" style="font-size: 14px; font-weight: 600;">Penicillin, Peanuts</div>
+            </div>
+
+            <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">CURRENT MEDICATIONS</div>
+              <div id="profileMedicines" style="font-size: 14px; font-weight: 600;">Lisinopril 10mg, Metformin 500mg</div>
+            </div>
+
+            <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">CHRONIC CONDITIONS</div>
+              <div id="profileConditions" style="font-size: 14px; font-weight: 600;">Hypertension, Type 2 Diabetes</div>
+            </div>
+
+            <div style="padding: 12px; background: rgba(5, 8, 17, 0.6); border-radius: var(--rf-radius-sm);">
+              <div style="font-size: 11px; color: var(--rf-text-secondary);">PREFERRED HOSPITAL</div>
+              <div id="profileHospital" style="font-size: 14px; font-weight: 600;">St. Mary's General Hospital</div>
+            </div>
           </div>
 
-          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 12px; color: var(--text-secondary);">KNOWN ALLERGIES</div>
-            <div id="profileAllergies" style="font-size: 15px; font-weight: 600;">Penicillin, Peanuts</div>
-          </div>
+          <button class="rf-btn rf-btn-primary" style="width: 100%; margin-top: 20px;" onclick="downloadMedicalSummary()">
+            📥 Export Emergency Card (JSON)
+          </button>
+        </div>
+      </section>
 
-          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 12px; color: var(--text-secondary);">CHRONIC CONDITIONS</div>
-            <div id="profileConditions" style="font-size: 15px; font-weight: 600;">Hypertension, Type 2 Diabetes</div>
-          </div>
+      <!-- ========================================== -->
+      <!-- VIEW 8: EVENT HISTORY (/history)           -->
+      <!-- ========================================== -->
+      <section id="view-history" class="rf-view">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <button class="rf-icon-btn" onclick="navigateTo('dashboard')">←</button>
+          <h2 style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700;">Emergency Event History</h2>
+        </div>
 
-          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 12px; color: var(--text-secondary);">CURRENT MEDICINES</div>
-            <div id="profileMedicines" style="font-size: 15px; font-weight: 600;">Lisinopril 10mg, Metformin 500mg</div>
-          </div>
-
-          <div style="padding: 16px; background: rgba(10, 13, 20, 0.5); border-radius: 14px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 12px; color: var(--text-secondary);">PREFERRED HOSPITAL</div>
-            <div id="profileHospital" style="font-size: 15px; font-weight: 600;">St. Mary's General Hospital</div>
+        <div class="rf-card">
+          <div id="sosHistoryContainer" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Rendered via JS -->
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- TAB 5: EVENT HISTORY -->
-    <section id="tab-history" class="tab-content" style="display: none;">
-      <div class="glass-card">
-        <div class="card-title">📜 Emergency SOS Event Log</div>
-        <div id="sosHistoryContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
-          <!-- Rendered via JS -->
+      <!-- ========================================== -->
+      <!-- VIEW 9: HEALTHCARE AI (/healthcare-ai)     -->
+      <!-- ========================================== -->
+      <section id="view-healthcare-ai" class="rf-view">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <button class="rf-icon-btn" onclick="navigateTo('dashboard')">←</button>
+          <h2 style="font-family: var(--rf-font-display); font-size: 20px; font-weight: 700;">Healthcare AI Assistant</h2>
+        </div>
+
+        <div class="rf-card">
+          <p style="color: var(--rf-text-secondary); font-size: 12px; margin-bottom: 12px;">
+            Emergency triage assistant. Type or speak your symptoms below.
+          </p>
+
+          <!-- Quick Suggestion Chips -->
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+            <button class="rf-btn rf-btn-primary" style="padding: 5px 10px; font-size: 11px;" onclick="sendQuickChatMessage('I am experiencing chest pain and left arm numbness')">🚨 Chest Pain</button>
+            <button class="rf-btn rf-btn-primary" style="padding: 5px 10px; font-size: 11px;" onclick="sendQuickChatMessage('What are the first aid steps for CPR?')">🫀 CPR Steps</button>
+            <button class="rf-btn rf-btn-primary" style="padding: 5px 10px; font-size: 11px;" onclick="sendQuickChatMessage('First aid for minor burns')">🔥 Burn Care</button>
+          </div>
+
+          <!-- Chat Stream Log -->
+          <div id="chatMessagesContainer" style="height: 320px; overflow-y: auto; background: rgba(5, 8, 17, 0.7); border: 1px solid var(--rf-navy-card-border); border-radius: var(--rf-radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+            <div style="padding: 10px 14px; background: rgba(15, 23, 42, 0.8); border-radius: 12px; max-width: 85%; border-left: 3px solid var(--rf-cyan-accent);">
+              <div style="font-size: 10px; color: var(--rf-cyan-accent); font-weight: 700;">HEALTHCARE AI</div>
+              <div style="font-size: 13px; color: #fff; margin-top: 2px;">Hello! How are you feeling right now? Ask me any symptom or first-aid question.</div>
+            </div>
+          </div>
+
+          <!-- Chat Form -->
+          <form id="chatForm" onsubmit="handleHealthChatSubmit(event)" style="display: flex; gap: 8px;">
+            <input type="text" id="chatInput" class="rf-input" placeholder="Describe symptoms or question..." required style="flex: 1;">
+            <button type="button" class="rf-btn rf-btn-primary" style="padding: 10px 14px;" onclick="handleVoiceChatInput()">🎙️</button>
+            <button type="submit" class="rf-btn rf-btn-primary" style="padding: 10px 16px;">Send</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Desktop Feature Highlights Footer Bar -->
+    <footer class="rf-feature-bar">
+      <div class="rf-feature-item">
+        <div class="rf-feature-icon">🚨</div>
+        <div>
+          <div class="rf-feature-title">One Tap SOS</div>
+          <div class="rf-feature-sub">Instant emergency alert</div>
         </div>
       </div>
-    </section>
+
+      <div class="rf-feature-item">
+        <div class="rf-feature-icon">🎙️</div>
+        <div>
+          <div class="rf-feature-title">Voice Trigger</div>
+          <div class="rf-feature-sub">Say "HELP" to activate</div>
+        </div>
+      </div>
+
+      <div class="rf-feature-item">
+        <div class="rf-feature-icon">📍</div>
+        <div>
+          <div class="rf-feature-title">Live GPS Sharing</div>
+          <div class="rf-feature-sub">Real-time location</div>
+        </div>
+      </div>
+
+      <div class="rf-feature-item">
+        <div class="rf-feature-icon">📞</div>
+        <div>
+          <div class="rf-feature-title">Emergency Contacts</div>
+          <div class="rf-feature-sub">Instant notification</div>
+        </div>
+      </div>
+
+      <div class="rf-feature-item">
+        <div class="rf-feature-icon">💬</div>
+        <div>
+          <div class="rf-feature-title">AI Assistant</div>
+          <div class="rf-feature-sub">Smart medical help</div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav id="mobileBottomNav" class="rf-bottom-nav">
+      <button class="rf-nav-item active" onclick="navigateTo('dashboard')" id="navItemHome">
+        <span class="rf-nav-icon">🏠</span>
+        <span>Home</span>
+      </button>
+
+      <button class="rf-nav-sos-center" onclick="triggerEmergencyAlert('MANUAL_BUTTON')">
+        SOS
+      </button>
+
+      <button class="rf-nav-item" onclick="navigateTo('contacts')" id="navItemContacts">
+        <span class="rf-nav-icon">📞</span>
+        <span>Contacts</span>
+      </button>
+
+      <button class="rf-nav-item" onclick="navigateTo('medical-id')" id="navItemMore">
+        <span class="rf-nav-icon">📋</span>
+        <span>Medical ID</span>
+      </button>
+    </nav>
 
   </div>
 
   <!-- EMERGENCY SOS COUNTDOWN MODAL -->
-  <div id="sosModal" class="modal-overlay">
-    <div class="sos-modal-content">
-      <h2 style="color: var(--accent-red); font-family: var(--font-display); font-size: 26px;">🚨 EMERGENCY SOS TRIGGERED</h2>
-      <div id="sosPhraseNote" style="font-size: 14px; color: var(--text-secondary);">Voice keyword match detected</div>
+  <div id="sosModal" class="rf-modal-overlay">
+    <div class="rf-sos-modal-content">
+      <h2 style="color: var(--rf-emergency-red); font-family: var(--rf-font-display); font-size: 24px;">🚨 EMERGENCY SOS TRIGGERED</h2>
+      <div id="sosPhraseNote" style="font-size: 13px; color: var(--rf-text-secondary);">Voice keyword match detected</div>
       
-      <div class="countdown-circle">
+      <div style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--rf-emergency-red); display: flex; align-items: center; justify-content: center; font-family: var(--rf-font-display); font-size: 44px; font-weight: 800; color: var(--rf-emergency-red); box-shadow: 0 0 30px var(--rf-emergency-glow);">
         <span id="countdownValue">5</span>
       </div>
 
-      <p style="font-size: 13px; color: var(--text-secondary);">
+      <p style="font-size: 12px; color: var(--rf-text-secondary);">
         Dispatching location and medical profile to primary caregivers in 5 seconds.
       </p>
 
-      <button class="btn btn-danger" style="width: 100%; padding: 16px; font-size: 16px;" onclick="cancelEmergencyAlert()">
+      <button class="rf-btn rf-btn-danger" style="width: 100%; padding: 14px; font-size: 15px;" onclick="cancelEmergencyAlert()">
         CANCEL EMERGENCY ALERT
       </button>
+    </div>
+  </div>
+
+  <!-- Edit Medical Profile Modal -->
+  <div id="editProfileModal" class="rf-modal-overlay">
+    <div class="rf-sos-modal-content" style="border-color: var(--rf-cyan-accent); box-shadow: 0 0 50px var(--rf-cyan-glow); text-align: left;">
+      <h3 style="font-family: var(--rf-font-display); font-size: 20px; color: #fff; margin-bottom: 14px;">Edit Medical Profile</h3>
+      <form id="editProfileForm" onsubmit="handleSaveProfileEdit(event)">
+        <div class="rf-form-group">
+          <label class="rf-label">Full Name</label>
+          <input type="text" id="editName" class="rf-input" required>
+        </div>
+        <div class="rf-form-group">
+          <label class="rf-label">Blood Group</label>
+          <input type="text" id="editBlood" class="rf-input" required>
+        </div>
+        <div class="rf-form-group">
+          <label class="rf-label">Allergies</label>
+          <input type="text" id="editAllergies" class="rf-input">
+        </div>
+        <div class="rf-form-group">
+          <label class="rf-label">Current Medications</label>
+          <input type="text" id="editMedicines" class="rf-input">
+        </div>
+        <div class="rf-form-group">
+          <label class="rf-label">Chronic Conditions</label>
+          <input type="text" id="editConditions" class="rf-input">
+        </div>
+        <div class="rf-form-group">
+          <label class="rf-label">Preferred Hospital</label>
+          <input type="text" id="editHospital" class="rf-input">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button type="submit" class="rf-btn rf-btn-primary" style="flex: 1;">Save Profile</button>
+          <button type="button" class="rf-btn" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="closeEditProfileModal()">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 
